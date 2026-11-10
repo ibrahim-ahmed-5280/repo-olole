@@ -1,0 +1,22 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+uploads/
+playwright-report/
+test-results/
+*.log
+.DS_Store
+.vite/
+
+# Local tool config
+.claude/
+*.pem
+*.key
+*.crt
+*.gz
+*.tgz
+*.archive
+

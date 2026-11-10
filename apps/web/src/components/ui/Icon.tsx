@@ -1,0 +1,61 @@
+import {
+  BarChart3,
+  BookOpen,
+  Calendar,
+  ClipboardCheck,
+  Code2,
+  Compass,
+  Ear,
+  Eye,
+  Flag,
+  GraduationCap,
+  Handshake,
+  HeartHandshake,
+  Landmark,
+  Laptop,
+  Library,
+  Lightbulb,
+  Link2,
+  Megaphone,
+  MessagesSquare,
+  Scale,
+  ShieldCheck,
+  Sparkles,
+  Target,
+  Users,
+  type LucideIcon,
+  type LucideProps,
+} from 'lucide-react';
+import type { IconName } from '@reveal/shared';
+
+const ICONS: Record<IconName, LucideIcon> = {
+  'graduation-cap': GraduationCap,
+  'book-open': BookOpen,
+  library: Library,
+  laptop: Laptop,
+  code: Code2,
+  lightbulb: Lightbulb,
+  users: Users,
+  handshake: Handshake,
+  'messages-square': MessagesSquare,
+  'heart-handshake': HeartHandshake,
+  link: Link2,
+  calendar: Calendar,
+  ear: Ear,
+  compass: Compass,
+  landmark: Landmark,
+  scale: Scale,
+  eye: Eye,
+  'clipboard-check': ClipboardCheck,
+  megaphone: Megaphone,
+  'bar-chart': BarChart3,
+  flag: Flag,
+  target: Target,
+  'shield-check': ShieldCheck,
+  sparkles: Sparkles,
+};
+
+export function Icon({ name, ...props }: { name: IconName } & LucideProps) {
+  const C = ICONS[name] ?? Flag;
+  return <C aria-hidden="true" focusable="false" {...props} />;
+}
