@@ -114,7 +114,7 @@ export function RoadmapView({ roadmap, pillars, preview, linkPrefix = '' }: Prop
       <RoadmapProgress value={progress} current={Math.min(total, active + 1)} total={total} color={theme.color} />
 
       <header className="relative isolate overflow-hidden px-4 pb-10 pt-24 sm:px-6 sm:pt-28">
-        <div aria-hidden className="absolute inset-x-0 top-0 -z-10 h-[32rem]" style={{ background: `radial-gradient(60% 60% at 50% 0%, ${theme.soft.replace('0.12', '0.35')}, transparent 70%)` }} />
+        <div aria-hidden className="absolute inset-x-0 top-0 -z-10 h-[32rem]" style={{ background: `radial-gradient(60% 60% at 50% 0%, ${theme.soft.replace('0.10', '0.06')}, transparent 70%)` }} />
         <svg aria-hidden viewBox="0 0 300 120" className="absolute right-[-4rem] top-24 -z-10 hidden w-[28rem] opacity-25 md:block" fill="none" stroke={theme.color} strokeWidth="1.5">
           <path d={HEADER_ART[roadmap.theme]} />
         </svg>

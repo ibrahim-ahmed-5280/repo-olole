@@ -26,7 +26,7 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   retries: 0,
-  timeout: 45_000,
+  timeout: 90_000, // responsive cases load three pages each; generous for slower machines
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL: BASE,

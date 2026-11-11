@@ -41,6 +41,26 @@ test.describe('public experience', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Eng. Zakariye Mohamed Omar' })).toBeVisible();
   });
 
+  test('intro portrait drops in from the top and settles centred; CTA rises in below it', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => localStorage.clear());
+    await page.goto('/');
+    const box = page.getByTestId('intro-portrait').locator('> div').first(); // the animated portrait box
+    await box.waitFor({ state: 'attached' });
+    const early = (await box.boundingBox())!;
+    await page.waitForTimeout(2300);
+    const settled = (await box.boundingBox())!;
+    expect(early.y).toBeLessThan(settled.y - 40); // started ABOVE, moved DOWN
+    const vw = page.viewportSize()!.width;
+    expect(Math.abs(settled.x + settled.width / 2 - vw / 2)).toBeLessThanOrEqual(2); // horizontally centred
+    const cta = (await page.getByTestId('intro-cta').boundingBox())!;
+    expect(cta.y).toBeGreaterThan(settled.y + settled.height); // CTA below the portrait
+    expect(Math.abs(cta.x + cta.width / 2 - vw / 2)).toBeLessThanOrEqual(2);
+    await expect(page.getByTestId('intro-cta')).toBeInViewport();
+    await page.getByTestId('intro-cta').click();
+    await expect(page).toHaveURL(/\/vision$/);
+  });
+
   test('returning visitors skip the intro; skip link works', async ({ page }) => {
     await freshVisit(page);
     await page.getByRole('link', { name: 'Ka gudub hordhaca' }).click();
@@ -172,6 +192,17 @@ test.describe('responsive sweep', () => {
       const cta = page.getByRole('button', { name: 'DAAH-FUR ARAGTIDA' });
       await expect(cta).toBeInViewport();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      await page.waitForTimeout(1800);
+      const portrait = (await page.getByTestId('intro-portrait').boundingBox())!;
+      const ctaBox = (await cta.boundingBox())!;
+      expect(Math.abs(portrait.x + portrait.width / 2 - w / 2)).toBeLessThanOrEqual(2);
+      expect(ctaBox.y).toBeGreaterThan(portrait.y + portrait.height - 1);
+      expect(ctaBox.y + ctaBox.height).toBeLessThanOrEqual(h);
+      expect(portrait.y).toBeGreaterThanOrEqual(0);
+      const qm = (await page.locator('[data-testid=intro-portrait] svg').first().boundingBox())!;
+      expect(qm.x).toBeGreaterThan(portrait.x);
+      expect(qm.x + qm.width).toBeLessThan(portrait.x + portrait.width);
+      expect(qm.y).toBeGreaterThan(portrait.y);
 
       await page.goto('/vision');
       await expect(page.getByTestId('hotspot-about')).toBeVisible();

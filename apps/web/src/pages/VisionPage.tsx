@@ -33,7 +33,7 @@ export function VisionView({ candidate, pillars, linkPrefix = '', showReplay = t
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-glow">{t.vision.eyebrow}</p>
           <h1 data-route-focus tabIndex={-1} className="mt-3 text-[clamp(1.75rem,5vw,3rem)] font-extrabold outline-none">{candidate.name}</h1>
           {candidate.title && <p className="mx-auto mt-2 max-w-2xl text-sm text-muted sm:text-base">{candidate.title}</p>}
-          <p className="mx-auto mt-4 max-w-xl text-sm text-muted/90">{t.vision.intro}</p>
+          <p className="mx-auto mt-4 max-w-xl text-sm text-muted">{t.vision.intro}</p>
         </motion.div>
 
         <motion.div

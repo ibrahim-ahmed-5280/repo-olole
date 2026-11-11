@@ -21,7 +21,7 @@ if (!dbName.endsWith('_e2e')) {
 await connectDb(config.MONGODB_URI);
 await mongoose.connection.dropDatabase();
 await syncIndexes();
-await seedContent({ uploadDir: config.uploadDir, portraitPath: path.resolve(import.meta.dirname, '../assets/candidate/portrait-headshot.jpg'), publish: true });
+await seedContent({ uploadDir: config.uploadDir, imagesDir: path.resolve(import.meta.dirname, '../assets/candidate'), publish: true });
 for (const u of E2E_USERS) await Admin.create({ username: u.username, role: u.role, passwordHash: await hashPassword(u.password) });
 console.log(`E2E database ${dbName} ready.`);
 await mongoose.disconnect();

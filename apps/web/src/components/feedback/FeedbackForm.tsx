@@ -124,7 +124,7 @@ export function FeedbackForm({ pillar, disabled, onSkip }: Props) {
           aria-describedby={`${ids.s}-hint ${ids.s}-count`}
           aria-invalid={!!formState.errors.suggestion || undefined}
           {...register('suggestion')}
-          className="mt-2 w-full resize-y rounded-2xl border border-line bg-bg/60 p-4 text-base text-ink placeholder:text-muted/70 focus:border-[color:var(--accent)]"
+          className="mt-2 w-full resize-y rounded-2xl border border-line bg-surface p-4 text-base text-ink placeholder:text-muted/70 focus:border-[color:var(--accent)]"
         />
         <div className="mt-1 flex justify-between gap-4 text-xs text-muted">
           <span id={`${ids.s}-hint`}>{t.feedback.suggestionHint}</span>

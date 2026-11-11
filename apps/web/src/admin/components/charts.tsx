@@ -11,13 +11,13 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { PILLAR_THEME } from '../../lib/theme';
+import { PILLAR_THEME, TOKENS } from '../../lib/theme';
 import type { AnalyticsSummaryDTO, PillarSlug } from '@reveal/shared';
 import { Card } from './ui';
 
-const AXIS = { stroke: '#A9B7C9', fontSize: 12 };
-const GRID = '#29415C';
-const TOOLTIP = { contentStyle: { background: '#101D30', border: '1px solid #29415C', borderRadius: 12, color: '#F8FAFC' }, labelStyle: { color: '#A9B7C9' } };
+const AXIS = { stroke: TOKENS.muted, fontSize: 12 };
+const GRID = TOKENS.line;
+const TOOLTIP = { contentStyle: { background: TOKENS.surface, border: `1px solid ${TOKENS.line}`, borderRadius: 12, color: TOKENS.ink, boxShadow: '0 8px 24px -12px rgba(22,43,37,0.2)' }, labelStyle: { color: TOKENS.muted } };
 const PILLAR_COLOR: Record<PillarSlug, string> = { waxbarasho: PILLAR_THEME.education.color, midnimo: PILLAR_THEME.unity.color, hoggaan: PILLAR_THEME.leadership.color };
 export const PILLAR_NAME: Record<PillarSlug, string> = { waxbarasho: 'Waxbarasho', midnimo: 'Midnimo', hoggaan: 'Hoggaan' };
 
@@ -66,8 +66,8 @@ export function TrafficChart({ daily, title = 'Traffic' }: { daily: AnalyticsSum
             <YAxis tick={AXIS} allowDecimals={false} />
             <Tooltip {...TOOLTIP} />
             <Legend />
-            <Line type="monotone" dataKey="pageViews" name="Page views" stroke="#4EC8FF" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="sessions" name="Sessions" stroke="#E6B85A" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="pageViews" name="Page views" stroke={TOKENS.secondary} strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="sessions" name="Sessions" stroke={TOKENS.brandGreen} strokeWidth={2} dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -86,10 +86,10 @@ export function RoadmapPopularityChart({ roadmaps }: { roadmaps: AnalyticsSummar
             <CartesianGrid stroke={GRID} strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="name" tick={AXIS} />
             <YAxis tick={AXIS} allowDecimals={false} />
-            <Tooltip {...TOOLTIP} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
+            <Tooltip {...TOOLTIP} cursor={{ fill: 'rgba(22,43,37,0.04)' }} />
             <Legend />
-            <Bar dataKey="views" name="Views (sessions)" fill="#258BFF" radius={[6, 6, 0, 0]} />
-            <Bar dataKey="completions" name="Completions" fill="#19B897" radius={[6, 6, 0, 0]} />
+            <Bar dataKey="views" name="Views (sessions)" fill={TOKENS.brandBlue} radius={[6, 6, 0, 0]} />
+            <Bar dataKey="completions" name="Completions" fill={TOKENS.brandGreen} radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -112,8 +112,8 @@ export function CompletionRateChart({ roadmaps }: { roadmaps: AnalyticsSummaryDT
             <CartesianGrid stroke={GRID} strokeDasharray="3 3" horizontal={false} />
             <XAxis type="number" domain={[0, 100]} tick={AXIS} unit="%" />
             <YAxis type="category" dataKey="name" tick={AXIS} width={90} />
-            <Tooltip {...TOOLTIP} formatter={(v) => `${v}%`} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
-            <Bar dataKey="rate" name="Completion rate" radius={[0, 6, 6, 0]} fill="#4EC8FF" />
+            <Tooltip {...TOOLTIP} formatter={(v) => `${v}%`} cursor={{ fill: 'rgba(22,43,37,0.04)' }} />
+            <Bar dataKey="rate" name="Completion rate" radius={[0, 6, 6, 0]} fill={TOKENS.teal} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -133,10 +133,10 @@ export function FeedbackDistributionChart({ feedback, range }: { feedback: Analy
             <CartesianGrid stroke={GRID} strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="name" tick={AXIS} />
             <YAxis tick={AXIS} allowDecimals={false} />
-            <Tooltip {...TOOLTIP} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
+            <Tooltip {...TOOLTIP} cursor={{ fill: 'rgba(22,43,37,0.04)' }} />
             <Legend />
-            <Bar dataKey="yes" name="Yes" stackId="a" fill="#3FD6A4" />
-            <Bar dataKey="no" name="No" stackId="a" fill="#FF7A85" radius={[6, 6, 0, 0]} />
+            <Bar dataKey="yes" name="Yes" stackId="a" fill={TOKENS.success} />
+            <Bar dataKey="no" name="No" stackId="a" fill={TOKENS.danger} radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -171,7 +171,7 @@ export function FeedbackSummaryCards({ feedback, range }: { feedback: AnalyticsS
 
 export function PollDisclaimer() {
   return (
-    <p role="note" className="rounded-xl border border-lead/40 bg-lead/10 p-3 text-sm text-lead">
+    <p role="note" className="rounded-xl border border-warn/40 bg-warn/10 p-3 text-sm text-warn">
       This data represents feedback from participating website visitors and is not a representative election poll. It must not be used to predict election results or to profile individuals.
     </p>
   );

@@ -1,13 +1,14 @@
 import fs from 'node:fs/promises';
+import path from 'node:path';
 import { CandidateProfile, Milestone, Pillar, WebsiteSettings } from '../models/content';
 import { storeImage } from '../services/media';
 import { publish } from '../services/content';
-import { DEFAULT_CANDIDATE, DEFAULT_PILLARS, DEFAULT_SETTINGS, exampleMilestone } from './defaultContent';
+import { DEFAULT_CANDIDATE, DEFAULT_PILLARS, DEFAULT_SETTINGS, SEED_IMAGES, exampleMilestone } from './defaultContent';
 
 export interface SeedOptions {
   uploadDir: string;
-  /** Path to the approved candidate portrait to import if no portrait is set yet. */
-  portraitPath?: string;
+  /** Folder holding the approved candidate photos (SEED_IMAGES), imported if not set yet. */
+  imagesDir?: string;
   /** Publish seeded content that has never been published. */
   publish?: boolean;
 }
@@ -27,21 +28,19 @@ export async function seedContent(opts: SeedOptions) {
   }
 
   const candidate = (await CandidateProfile.findOne({ key: 'main' }))!;
-  if (!candidate.portraitAssetId && opts.portraitPath) {
+  const importImage = async (kind: keyof typeof SEED_IMAGES) => {
+    const { file, alt } = SEED_IMAGES[kind];
+    const asset = await storeImage({ uploadDir: opts.uploadDir, buffer: await fs.readFile(path.join(opts.imagesDir!, file)), originalName: file, altText: alt });
+    report.push(`${kind} image imported (${file})`);
+    return asset._id;
+  };
+  if (opts.imagesDir) {
     try {
-      const buffer = await fs.readFile(opts.portraitPath);
-      const asset = await storeImage({
-        uploadDir: opts.uploadDir,
-        buffer,
-        originalName: 'portrait-headshot.jpg',
-        altText: `Sawirka ${DEFAULT_CANDIDATE.name}`,
-      });
-      candidate.portraitAssetId = asset._id;
-      candidate.set('pose.assetId', asset._id);
+      if (!candidate.portraitAssetId) candidate.portraitAssetId = await importImage('portrait');
+      if (!candidate.pose?.assetId) candidate.set('pose.assetId', await importImage('pose'));
       await candidate.save();
-      report.push('portrait imported');
     } catch (err) {
-      report.push(`portrait not imported (${(err as Error).message})`);
+      report.push(`images not imported (${(err as Error).message})`);
     }
   }
 

@@ -2,6 +2,7 @@ import { useLayoutEffect, useState, type RefObject } from 'react';
 import { motion, useScroll, useSpring, type MotionValue } from 'motion/react';
 import type { PillarTheme } from '@reveal/shared';
 import { useReducedMotionPref } from '../../lib/motion';
+import { TOKENS } from '../../lib/theme';
 
 export interface PathPoint {
   x: number;
@@ -107,22 +108,28 @@ export function RoadmapPath({ containerRef, variant, color, milestoneCount }: Pr
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
+        {/* Hoggaan's lit road blends the two Hormuud colours along its length. */}
+        <linearGradient id="lead-road" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2={geo.height}>
+          <stop offset="0" stopColor={TOKENS.brandBlue} />
+          <stop offset="0.5" stopColor={TOKENS.teal} />
+          <stop offset="1" stopColor={TOKENS.brandGreen} />
+        </linearGradient>
       </defs>
 
       {/* Base road */}
-      {variant === 'leadership' && <path d={main} fill="none" stroke="#172840" strokeWidth={isWide ? 22 : 14} strokeLinecap="round" />}
+      {variant === 'leadership' && <path d={main} fill="none" stroke={TOKENS.greenSoft} strokeWidth={isWide ? 22 : 14} strokeLinecap="round" />}
       <path
         d={main}
         fill="none"
-        stroke="#29415C"
+        stroke={TOKENS.lineStrong}
         strokeWidth={variant === 'leadership' ? 2 : 3}
         strokeLinecap="round"
         strokeDasharray={variant === 'education' ? '2 12' : variant === 'leadership' ? '10 10' : undefined}
       />
-      {twin && <path d={twin} fill="none" stroke="#29415C" strokeWidth={2} strokeLinecap="round" />}
+      {twin && <path d={twin} fill="none" stroke={TOKENS.lineStrong} strokeWidth={2} strokeLinecap="round" />}
 
       {/* Illuminated progress */}
-      <motion.path d={main} fill="none" stroke={color} strokeWidth={variant === 'leadership' ? 3 : 4} strokeLinecap="round" filter={`url(#glow-${variant})`} style={{ pathLength: progress }} />
+      <motion.path d={main} fill="none" stroke={variant === 'leadership' ? 'url(#lead-road)' : color} strokeWidth={variant === 'leadership' ? 3 : 4} strokeLinecap="round" filter={`url(#glow-${variant})`} style={{ pathLength: progress }} />
       {twin && <motion.path d={twin} fill="none" stroke={color} strokeOpacity={0.6} strokeWidth={2.5} strokeLinecap="round" style={{ pathLength: progress }} />}
 
       {/* Unity: rings linking the two strands at each milestone */}

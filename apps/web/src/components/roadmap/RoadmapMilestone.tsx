@@ -5,6 +5,7 @@ import type { MilestoneDTO, PillarTheme } from '@reveal/shared';
 import { useT } from '../../i18n';
 import { responsiveImage } from '../../lib/images';
 import { useReducedMotionPref } from '../../lib/motion';
+import { TOKENS } from '../../lib/theme';
 import { Icon } from '../ui/Icon';
 import { Badge, cx } from '../ui/primitives';
 
@@ -27,9 +28,9 @@ function NodeShape({ variant, color, state, index }: { variant: PillarTheme; col
       <span
         className={cx(base, shape)}
         style={{
-          borderColor: filled ? color : '#29415C',
-          background: filled ? color : '#101D30',
-          color: filled ? '#07111F' : '#A9B7C9',
+          borderColor: filled ? color : TOKENS.lineStrong,
+          background: filled ? color : TOKENS.surface,
+          color: filled ? '#FFFFFF' : TOKENS.muted,
           boxShadow: state === 'active' ? `0 0 28px ${color}88` : undefined,
         }}
       >
@@ -90,7 +91,7 @@ export const RoadmapMilestone = forwardRef<HTMLLIElement, Props>(function Roadma
             <Icon name={m.icon} className="size-5" />
           </span>
           {m.isExample && (
-            <Badge className="border-lead/50 text-lead" title={t.roadmap.exampleHint}>
+            <Badge className="border-warn/50 text-warn" title={t.roadmap.exampleHint}>
               {t.roadmap.example}
             </Badge>
           )}
@@ -124,7 +125,7 @@ export const RoadmapMilestone = forwardRef<HTMLLIElement, Props>(function Roadma
               {details.length > 0 && (
                 <dl className="grid gap-3">
                   {details.map(([label, value]) => (
-                    <div key={label} className="rounded-xl border border-line/60 bg-bg/40 p-3">
+                    <div key={label} className="rounded-xl border border-line bg-elevated p-3">
                       <dt className="text-xs font-semibold uppercase tracking-[0.15em] text-[color:var(--accent)]">{label}</dt>
                       <dd className="mt-1 whitespace-pre-line text-sm text-ink/90">{value}</dd>
                     </div>

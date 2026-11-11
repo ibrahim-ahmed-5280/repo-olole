@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { motion } from 'motion/react';
 import type { PublicImage } from '@reveal/shared';
 import { responsiveImage } from '../../lib/images';
@@ -8,14 +9,25 @@ interface Props {
   alt: string;
   sizes?: string;
   className?: string;
-  /** Animate upward + fade in on mount. */
+  /** Animate into place + fade in on mount. */
   entrance?: boolean;
+  /** 'bottom' rises up (default); 'top' drops down from above into the final position. */
+  entranceFrom?: 'top' | 'bottom';
+  /** Absolute start offset in px (defaults: 72 from bottom, 160 from top). */
+  entranceOffset?: number;
+  entranceDuration?: number;
+  /** Overlays (e.g. the mystery "?") rendered inside the portrait box so they move with it. */
+  children?: ReactNode;
   priority?: boolean;
-  masked?: 'radial' | 'bottom' | 'none';
+  /**
+   * radial/bottom: blend the photo into the page with a mask.
+   * frame: present a studio photo as a framed portrait with a Hormuud blue→green edge.
+   */
+  masked?: 'radial' | 'bottom' | 'frame' | 'none';
 }
 
-/** Responsive candidate portrait with WebP sources, stable aspect ratio and a soft blend into the page. */
-export function CandidatePortrait({ image, alt, sizes = '(max-width: 640px) 90vw, 520px', className, entrance, priority, masked = 'radial' }: Props) {
+/** Responsive candidate portrait with WebP sources, stable aspect ratio and either a mask or a frame. */
+export function CandidatePortrait({ image, alt, sizes = '(max-width: 640px) 90vw, 520px', className, entrance, entranceFrom = 'bottom', entranceOffset, entranceDuration = 1.05, priority, masked = 'radial', children }: Props) {
   const maskClass = masked === 'radial' ? 'portrait-mask' : masked === 'bottom' ? 'portrait-mask-soft' : '';
   if (!image) {
     return (
@@ -28,6 +40,7 @@ export function CandidatePortrait({ image, alt, sizes = '(max-width: 640px) 90vw
     );
   }
   const img = responsiveImage(image, sizes);
+  const framed = masked === 'frame';
   const picture = (
     <picture>
       {img.webpSrcSet && <source type="image/webp" srcSet={img.webpSrcSet} sizes={img.sizes} />}
@@ -39,21 +52,30 @@ export function CandidatePortrait({ image, alt, sizes = '(max-width: 640px) 90vw
         decoding="async"
         loading={priority ? 'eager' : 'lazy'}
         fetchPriority={priority ? 'high' : 'auto'}
-        className={cx('block h-auto w-full select-none object-contain', maskClass)}
+        className={cx('block w-full select-none', framed ? 'h-full object-cover' : 'h-auto object-contain', maskClass)}
         draggable={false}
       />
     </picture>
   );
-  if (!entrance) return <div className={cx('relative w-full', className)} style={{ aspectRatio: `${image.width} / ${image.height}` }}>{picture}</div>;
+  const content = framed ? <div className="portrait-frame-inner h-full w-full">{picture}</div> : picture;
+  const boxClass = cx('relative w-full', framed && 'portrait-frame', className);
+  const style = { aspectRatio: `${image.width} / ${image.height}` };
+  if (!entrance) return <div className={boxClass} style={style}>{content}{children}</div>;
   return (
     <motion.div
-      className={cx('relative w-full', className)}
-      style={{ aspectRatio: `${image.width} / ${image.height}` }}
-      initial={{ opacity: 0, y: 48 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.95, ease: [0.22, 1, 0.36, 1] }}
+      className={boxClass}
+      style={style}
+      initial={
+        entranceFrom === 'top'
+          ? { opacity: 0, y: -Math.abs(entranceOffset ?? 160) }
+          : { opacity: 0, y: Math.abs(entranceOffset ?? 72), scale: 0.97 }
+      }
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      // Cinematic ease-out: fast start, long gentle settle, no overshoot/bounce.
+      transition={{ duration: entranceDuration, ease: [0.16, 1, 0.3, 1] }}
     >
-      {picture}
+      {content}
+      {children}
     </motion.div>
   );
 }

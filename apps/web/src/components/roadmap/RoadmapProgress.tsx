@@ -5,7 +5,7 @@ export function RoadmapProgress({ value, current, total, color }: { value: numbe
   const t = useT();
   const pct = Math.round(value * 100);
   return (
-    <div className="fixed inset-x-0 top-0 z-30 h-1 bg-line/40">
+    <div className="fixed inset-x-0 top-0 z-50 h-1 bg-line/60">
       <div
         role="progressbar"
         aria-label={t.roadmap.progress}

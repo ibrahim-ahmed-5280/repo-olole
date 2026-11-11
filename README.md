@@ -6,9 +6,9 @@ Visitor journey: **QR / link → Mystery entrance → Candidate reveal → Inter
 
 | Pillar | Route | Theme |
 |---|---|---|
-| WAXBARASHO (Education) | `/roadmap/waxbarasho` | Electric blue · dashed "chapter" path · book-style nodes |
-| MIDNIMO (Unity) | `/roadmap/midnimo` | Emerald · two intertwined strands linked by rings |
-| HOGGAAN (Leadership) | `/roadmap/hoggaan` | Gold · double-rail road · compass-tick diamond nodes |
+| WAXBARASHO (Education) | `/roadmap/waxbarasho` | Hormuud blue · dashed "chapter" path · book-style nodes |
+| MIDNIMO (Unity) | `/roadmap/midnimo` | Hormuud green · two intertwined strands linked by rings |
+| HOGGAAN (Leadership) | `/roadmap/hoggaan` | Pearl with blue→green gradient · double-rail road · compass-tick diamond nodes |
 
 ## Stack
 
@@ -56,13 +56,17 @@ npm run dev
 
 On Windows PowerShell, `--` is swallowed by npm's shim; quote it: `npm run admin:create '--' --username owner --role owner`.
 
-## Replacing the candidate photo (required before launch)
+## Candidate photos & hotspots
 
-The supplied photograph is head-and-shoulders. The interactive home is designed for an **arms-open** photo, so it currently shows a **"Sawir ku meel gaar ah" (temporary photo)** badge.
+`assets/candidate/` holds the approved photos imported by `db:seed`:
 
-1. Admin → Media Library → upload the approved photo (or `npm run media:import-portrait -- --file ./arms-open.jpg --as pose --alt "…"`).
-2. Admin → Candidate Profile → choose it as *Interactive pose*, click on the photo to place each hotspot (Education = candidate's **right** hand, Unity = **left** hand, Leadership = in front, About = upper chest), untick *temporary placeholder*.
-3. Preview draft → Publish.
+| File | Used for |
+|---|---|
+| `intro-portrait-folded-arms.png` | Intro / mystery entrance (rises in, "?" over the face) |
+| `pose-arms-open.png` | Interactive vision page (hotspots on the hands, chest and front) |
+| `hormuud-university-logo.png` | Colour reference for the theme (not rendered on the site) |
+
+To change a photo: Admin → Media Library → upload, then Admin → Candidate Profile → choose it and click on the photo to set the **face point** (intro "?") and the four **hotspots** (Waxbarasho = candidate's right palm, Midnimo = left palm, Hoggaan = in front, About = upper chest) → Preview draft → Publish. CLI alternative: `npm run media:import-portrait -- --file <img> --as pose|portrait --alt "…"`.
 
 ## Scripts
 

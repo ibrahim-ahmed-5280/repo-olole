@@ -90,7 +90,7 @@ export default function FeedbackInboxPage() {
         title="Feedback inbox"
         description="Anonymous roadmap feedback. No names, student IDs, IPs or device data are stored."
         actions={hasPermission(role, 'feedback:export') && (
-          <a href={`${API_BASE}/admin/feedback/export.csv?${exportParams}`} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-line px-4 text-sm font-semibold hover:bg-white/5">
+          <a href={`${API_BASE}/admin/feedback/export.csv?${exportParams}`} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-line px-4 text-sm font-semibold hover:bg-ink/5">
             <Download className="size-4" aria-hidden /> Export CSV
           </a>
         )}

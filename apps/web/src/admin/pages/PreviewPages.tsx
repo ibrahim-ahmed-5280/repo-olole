@@ -7,7 +7,7 @@ import { useAdminPillars, usePreviewCandidate, usePreviewRoadmap } from '../api'
 
 function PreviewBanner() {
   return (
-    <div role="note" className="fixed inset-x-0 top-0 z-50 flex items-center justify-center gap-3 bg-lead px-4 py-1.5 text-center text-xs font-semibold text-bg">
+    <div role="note" className="fixed inset-x-0 top-0 z-50 flex items-center justify-center gap-3 bg-warn px-4 py-1.5 text-center text-xs font-semibold text-white">
       DRAFT PREVIEW — not visible to the public until published.
       <Link to="/admin" className="underline">Back to admin</Link>
     </div>

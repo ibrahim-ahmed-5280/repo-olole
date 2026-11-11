@@ -37,7 +37,7 @@ export function PublishBar({ state, basePath, previewHref, canUnpublish, invalid
       </span>
       <div className="ml-auto flex flex-wrap gap-2">
         {previewHref && (
-          <a href={previewHref} target="_blank" rel="noopener" className="inline-flex min-h-9 items-center gap-2 rounded-full border border-line px-3 text-sm font-semibold hover:bg-white/5">
+          <a href={previewHref} target="_blank" rel="noopener" className="inline-flex min-h-9 items-center gap-2 rounded-full border border-line px-3 text-sm font-semibold hover:bg-ink/5">
             <Eye className="size-4" aria-hidden /> Preview draft
           </a>
         )}

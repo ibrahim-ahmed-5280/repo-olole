@@ -34,7 +34,7 @@ export function PillarNavigation({ pillars, onOpenAbout, linkPrefix = '' }: { pi
                   </span>
                   <span className="mt-1 block font-display text-lg font-bold tracking-[0.12em]" style={{ color: theme.color }}>{p.name}</span>
                   <span className="mt-1 block text-sm text-muted">{p.tagline}</span>
-                  <span className="mt-2 block text-xs text-muted/80">{t.vision.milestones(p.milestoneCount)}</span>
+                  <span className="mt-2 block text-xs text-muted">{t.vision.milestones(p.milestoneCount)}</span>
                 </span>
                 <ArrowUpRight className="size-5 shrink-0 text-muted transition group-hover:text-ink" aria-hidden />
               </Link>

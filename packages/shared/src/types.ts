@@ -60,6 +60,8 @@ export interface CandidateDTO {
   vision: string;
   achievements: string[];
   portrait: PublicImage | null;
+  /** Face centre on the intro portrait (0–1), used to place the mystery "?". */
+  portraitFocal: Anchor;
   pose: {
     image: PublicImage | null;
     isPlaceholder: boolean;

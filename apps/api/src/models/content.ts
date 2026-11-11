@@ -39,6 +39,7 @@ const candidateSchema = new Schema(
     vision: { type: String, default: '', maxlength: 2000 },
     achievements: { type: [String], default: [] },
     portraitAssetId: { type: Schema.Types.ObjectId, ref: 'MediaAsset', default: null },
+    portraitFocal: anchor,
     pose: {
       assetId: { type: Schema.Types.ObjectId, ref: 'MediaAsset', default: null },
       isPlaceholder: { type: Boolean, default: true },

@@ -63,7 +63,7 @@ export function AdminLayout() {
           to={to}
           end={end}
           className={({ isActive }) =>
-            cx('flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium transition', isActive ? 'bg-primary/15 text-ink' : 'text-muted hover:bg-white/5 hover:text-ink')
+            cx('flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium transition', isActive ? 'bg-primary/10 font-semibold text-primary-strong' : 'text-muted hover:bg-ink/5 hover:text-ink')
           }
         >
           <I className="size-4" aria-hidden />
@@ -77,7 +77,7 @@ export function AdminLayout() {
     <div className="min-h-dvh bg-bg text-ink">
       <a href="#admin-main" className="sr-only-focusable fixed left-4 top-4 z-50 rounded-full bg-primary-strong px-4 py-2 text-white">Skip to content</a>
       <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-line bg-bg/90 px-4 py-2 backdrop-blur lg:hidden">
-        <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls="admin-sidebar" aria-label="Menu" className="grid size-11 place-items-center rounded-xl hover:bg-white/5">
+        <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls="admin-sidebar" aria-label="Menu" className="grid size-11 place-items-center rounded-xl hover:bg-ink/5">
           {open ? <X className="size-5" aria-hidden /> : <Menu className="size-5" aria-hidden />}
         </button>
         <span className="font-display text-sm font-bold tracking-[0.2em]">THE REVEAL · ADMIN</span>
@@ -87,7 +87,7 @@ export function AdminLayout() {
         <aside
           id="admin-sidebar"
           className={cx(
-            'fixed inset-y-0 left-0 z-40 w-72 flex-col border-r border-line bg-surface p-4 lg:sticky lg:top-0 lg:flex lg:h-dvh',
+            'fixed inset-y-0 left-0 z-40 w-72 flex-col border-r border-line bg-bg-soft p-4 lg:sticky lg:top-0 lg:flex lg:h-dvh',
             open ? 'flex' : 'hidden',
           )}
         >
@@ -97,7 +97,7 @@ export function AdminLayout() {
           </div>
           <div className="flex-1 overflow-y-auto">{nav}</div>
           <div className="mt-4 border-t border-line pt-4">
-            <a href="/vision" target="_blank" rel="noopener" className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm text-muted hover:bg-white/5 hover:text-ink">
+            <a href="/vision" target="_blank" rel="noopener" className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm text-muted hover:bg-ink/5 hover:text-ink">
               <ExternalLink className="size-4" aria-hidden /> View public site
             </a>
             <div className="mt-2 flex items-center justify-between gap-2 px-3">
@@ -105,13 +105,13 @@ export function AdminLayout() {
                 <p className="truncate text-sm font-semibold">{me.data?.user.username}</p>
                 <p className="text-xs capitalize text-muted">{role}</p>
               </div>
-              <button type="button" onClick={logout} className="grid size-11 place-items-center rounded-xl text-muted hover:bg-white/5 hover:text-ink" aria-label="Sign out" data-testid="logout">
+              <button type="button" onClick={logout} className="grid size-11 place-items-center rounded-xl text-muted hover:bg-ink/5 hover:text-ink" aria-label="Sign out" data-testid="logout">
                 <LogOut className="size-4" aria-hidden />
               </button>
             </div>
           </div>
         </aside>
-        {open && <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setOpen(false)} aria-hidden />}
+        {open && <div className="fixed inset-0 z-30 bg-ink/30 lg:hidden" onClick={() => setOpen(false)} aria-hidden />}
         <main id="admin-main" className="min-w-0 flex-1 px-4 py-6 sm:px-8 sm:py-8">
           <Outlet />
         </main>

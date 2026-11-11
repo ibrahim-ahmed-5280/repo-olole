@@ -3,6 +3,7 @@ import { ArrowUp, ChevronDown, ChevronUp, Share2 } from 'lucide-react';
 import type { MilestoneDTO } from '@reveal/shared';
 import { useT } from '../../i18n';
 import { cx } from '../ui/primitives';
+import { TOKENS } from '../../lib/theme';
 
 interface Props {
   milestones: MilestoneDTO[];
@@ -15,7 +16,7 @@ interface Props {
 }
 
 const iconBtn =
-  'grid size-11 place-items-center rounded-full text-ink transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-35';
+  'grid size-11 place-items-center rounded-full text-ink transition hover:bg-ink/5 disabled:cursor-not-allowed disabled:opacity-35';
 
 /** Floating bottom control bar + desktop milestone rail. Native scrolling is never hijacked. */
 export function RoadmapControls({ milestones, activeIndex, reached, color, onGo, onTop, shareTitle }: Props) {
@@ -55,7 +56,7 @@ export function RoadmapControls({ milestones, activeIndex, reached, color, onGo,
                 >
                   <span
                     className={cx('block rounded-full transition-all', i === activeIndex ? 'size-3' : 'size-2')}
-                    style={{ background: i <= reached ? color : '#29415C', boxShadow: i === activeIndex ? `0 0 10px ${color}` : undefined }}
+                    style={{ background: i <= reached ? color : TOKENS.lineStrong, boxShadow: i === activeIndex ? `0 0 10px ${color}` : undefined }}
                   />
                 </button>
               </li>

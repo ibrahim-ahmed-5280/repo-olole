@@ -123,6 +123,8 @@ export const candidateUpdateSchema = z
     vision: text(2000),
     achievements: listOfText(20, 300),
     portraitAssetId: objectIdSchema.nullable(),
+    /** Face centre on the intro portrait (normalized) — where the mystery "?" sits. */
+    portraitFocal: anchorSchema,
     pose: z.object({
       assetId: objectIdSchema.nullable(),
       isPlaceholder: z.boolean(),

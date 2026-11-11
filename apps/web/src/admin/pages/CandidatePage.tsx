@@ -7,7 +7,7 @@ import { adminKeys, useAdminMutation, useCandidateDraft, useMe, useMedia, type A
 import { Card, Field, PageHeader, TextArea, TextInput, Toggle, errorMessage, linesToList, useToast } from '../components/ui';
 import { PublishBar, VersionHistory } from '../components/publishing';
 import { MediaPicker } from '../components/media';
-import { HotspotEditor } from '../components/HotspotEditor';
+import { FacePointEditor, HotspotEditor } from '../components/HotspotEditor';
 
 type Form = Omit<CandidateDraft, 'id' | 'education' | 'experience' | 'skills' | 'achievements'> & {
   education: string;
@@ -49,6 +49,7 @@ export default function CandidatePage() {
       skills: linesToList(rest.skills),
       achievements: linesToList(rest.achievements),
       portraitAssetId: rest.portraitAssetId,
+      portraitFocal: rest.portraitFocal ?? { x: 0.5, y: 0.36 },
       pose: { assetId: rest.pose.assetId, isPlaceholder: rest.pose.isPlaceholder, focal: rest.pose.focal, anchors: rest.pose.anchors },
     });
   }, [adminKeys.candidate]);
@@ -57,6 +58,7 @@ export default function CandidatePage() {
   if (q.isError) return <ErrorState onRetry={() => void q.refetch()} />;
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => (f ? { ...f, [k]: v } : f));
   const poseImage = media.data?.find((m) => m.id === form.pose.assetId) ?? null;
+  const portraitImage = media.data?.find((m) => m.id === form.portraitAssetId) ?? null;
 
   const text = (k: 'name' | 'title', label: string, hint?: string) => (
     <Field label={label} hint={hint}>{(id, d) => <TextInput id={id} aria-describedby={d} value={form[k]} onChange={(e) => set(k, e.target.value)} disabled={!canWrite} />}</Field>
@@ -114,12 +116,14 @@ export default function CandidatePage() {
             />
           </div>
         </Card>
-        <Card title="Hotspot positions">
+        <Card title="Intro portrait — face point for the “?”">
+          <FacePointEditor image={portraitImage} value={form.portraitFocal ?? { x: 0.5, y: 0.36 }} onChange={(a) => set('portraitFocal', a)} />
+        </Card>
+        <Card title="Hotspot positions (interactive pose)">
           <HotspotEditor
             image={poseImage}
             anchors={form.pose.anchors}
-            focal={form.pose.focal}
-            onChange={(anchors: Record<HotspotKey, Anchor>, focal: Anchor) => set('pose', { ...form.pose, anchors, focal })}
+            onChange={(anchors: Record<HotspotKey, Anchor>) => set('pose', { ...form.pose, anchors })}
           />
         </Card>
         {canWrite && (

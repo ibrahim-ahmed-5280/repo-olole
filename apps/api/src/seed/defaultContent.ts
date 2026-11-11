@@ -20,19 +20,26 @@ export const DEFAULT_CANDIDATE = {
   motivation: '',
   vision: '',
   achievements: [] as string[],
+  /** Face centre on assets/candidate/intro-portrait-folded-arms.png (427×638). */
+  portraitFocal: { x: 0.497, y: 0.39 },
   pose: {
     assetId: null,
-    // The supplied photo is a head-and-shoulders portrait, not the required arms-open pose.
-    isPlaceholder: true,
-    focal: { x: 0.5, y: 0.33 },
+    // assets/candidate/pose-arms-open.png (436×653) — the approved arms-open photo.
+    isPlaceholder: false,
+    focal: { x: 0.5, y: 0.3 },
     anchors: {
-      // Candidate's anatomical RIGHT side appears on the viewer's LEFT.
-      education: { x: 0.13, y: 0.88 },
-      unity: { x: 0.87, y: 0.88 },
-      leadership: { x: 0.5, y: 0.97 },
-      about: { x: 0.66, y: 0.75 },
+      // Anatomical mapping: the candidate's RIGHT hand appears on the viewer's LEFT.
+      education: { x: 0.09, y: 0.465 }, // candidate's right palm → WAXBARASHO
+      unity: { x: 0.91, y: 0.465 }, // candidate's left palm → MIDNIMO
+      leadership: { x: 0.5, y: 0.665 }, // in front of the candidate, between the hands → HOGGAAN
+      about: { x: 0.5, y: 0.45 }, // upper chest / tie → "?" About
     },
   },
+};
+
+export const SEED_IMAGES = {
+  portrait: { file: 'intro-portrait-folded-arms.png', alt: 'Musharaxa oo gacmaha isku laabay' },
+  pose: { file: 'pose-arms-open.png', alt: 'Musharaxa oo labada gacmood kala furay' },
 };
 
 export const DEFAULT_SETTINGS = {

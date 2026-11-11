@@ -10,10 +10,10 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
 const VARIANTS: Record<Variant, string> = {
   primary:
-    'bg-gradient-to-b from-[#1F6FDB] to-[#1A62C8] text-white shadow-[0_8px_30px_-8px_rgba(37,139,255,0.65)] hover:brightness-110 active:brightness-95',
+    'bg-primary text-white shadow-[var(--shadow-float)] hover:bg-primary-strong active:brightness-95',
   secondary: 'glass text-ink hover:border-primary/60 hover:bg-elevated/80',
-  ghost: 'text-muted hover:text-ink hover:bg-white/5',
-  danger: 'bg-[#B4232F] text-white hover:brightness-110',
+  ghost: 'text-muted hover:text-ink hover:bg-ink/5',
+  danger: 'bg-danger text-white hover:brightness-110',
 };
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -62,7 +62,7 @@ export function ErrorState({ onRetry, message, title }: { onRetry?: () => void; 
   const t = useT();
   return (
     <div role="alert" className="mx-auto flex max-w-md flex-col items-center gap-4 p-10 text-center">
-      <AlertTriangle className="size-8 text-lead" aria-hidden />
+      <AlertTriangle className="size-8 text-warn" aria-hidden />
       <h2 className="text-xl font-semibold">{title ?? t.errorTitle}</h2>
       <p className="text-muted">{message ?? t.errorBody}</p>
       {onRetry && (

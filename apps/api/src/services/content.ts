@@ -53,6 +53,7 @@ export async function buildCandidateDTO(doc: Awaited<ReturnType<typeof getCandid
     vision: doc.vision,
     achievements: [...doc.achievements],
     portrait: imgs.get(String(doc.portraitAssetId)) ?? null,
+    portraitFocal: { x: doc.portraitFocal?.x ?? 0.5, y: doc.portraitFocal?.y ?? 0.35 },
     pose: {
       image: imgs.get(String(doc.pose?.assetId)) ?? null,
       isPlaceholder: doc.pose?.isPlaceholder ?? true,
@@ -233,7 +234,7 @@ export async function restoreVersion(versionId: string) {
   if (v.entityType === 'candidate') {
     const raw = snap._raw as Record<string, unknown> | undefined;
     if (!raw) throw new ApiError(422, 'NOT_RESTORABLE', 'This version cannot be restored');
-    const fields = ['name', 'title', 'introduction', 'biography', 'education', 'experience', 'skills', 'motivation', 'vision', 'achievements', 'portraitAssetId', 'pose'];
+    const fields = ['name', 'title', 'introduction', 'biography', 'education', 'experience', 'skills', 'motivation', 'vision', 'achievements', 'portraitAssetId', 'portraitFocal', 'pose'];
     const doc = await getCandidateDoc();
     for (const f of fields) doc.set(f, raw[f]);
     doc.draftUpdatedAt = new Date();

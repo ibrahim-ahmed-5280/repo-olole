@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { HelpCircle } from 'lucide-react';
 import {
   HOTSPOT_TO_PILLAR,
@@ -10,22 +10,42 @@ import {
 } from '@reveal/shared';
 import { useT } from '../../i18n';
 import { track } from '../../lib/analytics';
-import { PILLAR_THEME } from '../../lib/theme';
+import { BRAND, PILLAR_THEME } from '../../lib/theme';
 import { useElementSize } from '../../hooks/useElementSize';
 import { CandidatePortrait } from '../intro/CandidatePortrait';
 import { Icon } from '../ui/Icon';
 import { Badge } from '../ui/primitives';
 import { HotspotMarker, type ChipSide } from './HotspotMarker';
 
-const SAFE_INSET = 24; // keeps 44px markers inside the frame
-const COMPACT_BELOW = 400; // px of portrait width
+const SAFE_INSET = 28; // keeps 44–56px markers inside the frame
+/** Below this viewport width there is no room for floating labels: markers become numbered and the grid below carries the labels. */
+const COMPACT_VIEWPORT = '(max-width: 639px)';
+const COMPACT_PORTRAIT_BELOW = 260; // px of portrait width
 
+/*
+ * Label placement around the arms-open photo:
+ * - WAXBARASHO sits on the candidate's anatomical RIGHT palm (viewer's left), label above the hand.
+ * - MIDNIMO sits on the LEFT palm (viewer's right), label above the hand — mirrors Waxbarasho.
+ * - HOGGAAN sits in front of the candidate between the hands, as the emphasised central card.
+ */
 const CHIP_SIDE: Record<Exclude<HotspotKey, 'about'>, ChipSide> = {
-  // Candidate's anatomical right hand is on the viewer's left.
-  education: 'left',
-  unity: 'right',
+  education: 'above',
+  unity: 'above',
   leadership: 'below',
 };
+
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(() => typeof window !== 'undefined' && !!window.matchMedia?.(query).matches);
+  useEffect(() => {
+    const mql = window.matchMedia?.(query);
+    if (!mql) return;
+    const on = () => setMatches(mql.matches);
+    on();
+    mql.addEventListener?.('change', on);
+    return () => mql.removeEventListener?.('change', on);
+  }, [query]);
+  return matches;
+}
 
 interface Props {
   candidate: CandidateDTO;
@@ -42,6 +62,7 @@ interface Props {
 export function InteractiveCandidate({ candidate, pillars, onOpenAbout, linkPrefix = '' }: Props) {
   const t = useT();
   const [ref, size] = useElementSize<HTMLDivElement>();
+  const narrowViewport = useMediaQuery(COMPACT_VIEWPORT);
   const image = candidate.pose.image ?? candidate.portrait;
   const natural = image ? { width: image.width, height: image.height } : { width: 4, height: 5 };
 
@@ -53,16 +74,16 @@ export function InteractiveCandidate({ candidate, pillars, onOpenAbout, linkPref
     return Object.fromEntries(entries) as Record<HotspotKey, ReturnType<typeof mapAnchor>>;
   }, [candidate.pose.anchors, natural.width, natural.height, size]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const compact = size.width > 0 && (size.width < COMPACT_BELOW || markersOverlap(Object.values(points), 48));
+  const compact = size.width > 0 && (narrowViewport || size.width < COMPACT_PORTRAIT_BELOW || markersOverlap(Object.values(points), 52));
   const pillarBySlug = new Map(pillars.map((p) => [p.slug, p]));
   const ready = size.width > 0;
 
   return (
-    <div className="relative mx-auto w-full max-w-[34rem]" style={{ maxWidth: `min(34rem, calc(74dvh * ${natural.width / natural.height}))` }}>
+    <div className="relative mx-auto w-full max-w-[34rem]" style={{ maxWidth: `min(34rem, calc(76dvh * ${natural.width / natural.height}))` }}>
       <div ref={ref} className="relative w-full" style={{ aspectRatio: `${natural.width} / ${natural.height}` }}>
-        <CandidatePortrait image={image} alt={`${t.intro.portraitAlt}: ${candidate.name}`} priority masked="bottom" sizes="(max-width: 640px) 92vw, 544px" />
+        <CandidatePortrait image={image} alt={`${t.intro.portraitAlt}: ${candidate.name}`} priority masked="frame" sizes="(max-width: 640px) 92vw, 544px" />
         {candidate.pose.isPlaceholder && (
-          <Badge className="absolute left-2 top-2 border-lead/50 bg-bg/80 text-lead" title={t.vision.placeholderNote}>
+          <Badge className="absolute left-2 top-2 border-warn/50 bg-surface text-warn" title={t.vision.placeholderNote}>
             {t.vision.placeholderBadge}
           </Badge>
         )}
@@ -75,14 +96,15 @@ export function InteractiveCandidate({ candidate, pillars, onOpenAbout, linkPref
             const p = points[key];
             const chip =
               key === 'leadership' ? (
-                <span className="glass flex min-w-52 items-center gap-3 rounded-2xl border-lead/50 px-4 py-3 shadow-[0_10px_40px_-10px_rgba(230,184,90,0.5)]">
-                  <span className="text-left">
-                    <span className="block font-display text-base font-bold tracking-[0.18em]" style={{ color: theme.color }}>{pillar.name}</span>
-                    <span className="block text-xs text-muted">{pillar.subtitle}</span>
+                <span className="block rounded-2xl p-[1.5px] shadow-[var(--shadow-float)]" style={{ background: theme.gradient }}>
+                  <span className="flex min-w-52 flex-col items-center rounded-[calc(1rem-1px)] bg-surface px-5 py-3 text-center backdrop-blur">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-glow">{pillar.subtitle}</span>
+                    <span className="mt-0.5 block font-display text-lg font-extrabold tracking-[0.2em]" style={{ color: theme.color }}>{pillar.name}</span>
+                    <span className="mt-1 h-px w-10" style={{ background: theme.gradient }} />
                   </span>
                 </span>
               ) : (
-                <span className="glass flex flex-col rounded-xl px-3 py-2 text-left">
+                <span className="glass flex flex-col items-center rounded-xl px-3 py-1.5 text-center" style={{ borderColor: `${theme.color}66` }}>
                   <span className="font-display text-sm font-bold tracking-[0.18em]" style={{ color: theme.color }}>{pillar.name}</span>
                   <span className="text-[11px] text-muted">{pillar.subtitle}</span>
                 </span>
@@ -102,6 +124,7 @@ export function InteractiveCandidate({ candidate, pillars, onOpenAbout, linkPref
                 chipSide={CHIP_SIDE[key]}
                 compact={compact}
                 number={i + 1}
+                emphasis={key === 'leadership'}
                 to={`${linkPrefix}/roadmap/${pillar.slug}`}
                 onActivate={() => track({ type: 'hotspot_click', route: '/vision', pillar: pillar.slug, target: key })}
               />
@@ -113,12 +136,12 @@ export function InteractiveCandidate({ candidate, pillars, onOpenAbout, linkPref
             testId="hotspot-about"
             leftPct={points.about.leftPct}
             topPct={points.about.topPct}
-            color="#4EC8FF"
-            glow="rgba(78,200,255,0.45)"
+            color={BRAND.glow}
+            glow={BRAND.glowRgba}
             label={t.vision.aboutHotspotLabel}
             icon={<HelpCircle className="size-6" aria-hidden />}
-            chip={<span className="glass rounded-xl px-3 py-2 font-display text-sm font-bold tracking-[0.18em] text-glow">{t.vision.aboutHotspot}</span>}
-            chipSide="right"
+            chip={<span className="glass rounded-lg px-2.5 py-1 font-display text-xs font-bold tracking-[0.18em] text-glow">{t.vision.aboutHotspot}</span>}
+            chipSide="below"
             compact={compact}
             onActivate={() => {
               track({ type: 'about_open', route: '/vision', target: 'about' });

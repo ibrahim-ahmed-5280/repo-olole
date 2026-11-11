@@ -76,7 +76,7 @@ export function Dialog({ open, onClose, title, closeLabel, children, side = 'rig
       {open && (
         <div className="fixed inset-0 z-50" data-testid={testId}>
           <motion.div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-ink/30 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -108,7 +108,7 @@ export function Dialog({ open, onClose, title, closeLabel, children, side = 'rig
               <button
                 type="button"
                 onClick={onClose}
-                className="grid size-11 shrink-0 place-items-center rounded-full text-muted transition hover:bg-white/5 hover:text-ink"
+                className="grid size-11 shrink-0 place-items-center rounded-full text-muted transition hover:bg-ink/5 hover:text-ink"
                 aria-label={closeLabel}
               >
                 <X className="size-5" aria-hidden />

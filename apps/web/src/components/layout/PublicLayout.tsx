@@ -57,7 +57,7 @@ export function LanguageSwitch() {
 export function SiteHeader({ minimal = false }: { minimal?: boolean }) {
   const site = useSite();
   return (
-    <header className="pointer-events-none fixed inset-x-0 top-0 z-40 pt-[env(safe-area-inset-top)]">
+    <header className="pointer-events-none fixed inset-x-0 top-0 z-40 border-b border-line/70 bg-bg/85 pt-[env(safe-area-inset-top)] backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <Link
           to="/vision"
@@ -80,7 +80,7 @@ export function SiteFooter() {
   const { t } = useI18n();
   const site = useSite();
   return (
-    <footer className="border-t border-line/60 bg-bg/80 px-4 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-8 text-sm text-muted sm:px-6">
+    <footer className="border-t border-line bg-bg-soft px-4 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-8 text-sm text-muted sm:px-6">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="max-w-xl">{site.data?.branding.campaignContext}</p>
         <nav aria-label="Footer" className="flex flex-wrap items-center gap-4">
@@ -94,7 +94,7 @@ export function SiteFooter() {
           </Link>
         </nav>
       </div>
-      <p className="mx-auto mt-4 max-w-7xl text-xs text-muted/80">{t.footer.note}</p>
+      <p className="mx-auto mt-4 max-w-7xl text-xs text-muted">{t.footer.note}</p>
     </footer>
   );
 }

@@ -61,7 +61,7 @@ export const Select = ({ className, ...p }: SelectHTMLAttributes<HTMLSelectEleme
 export function Toggle({ checked, onChange, label, description }: { checked: boolean; onChange: (v: boolean) => void; label: string; description?: string }) {
   const id = useId();
   return (
-    <div className="flex items-start justify-between gap-4 rounded-xl border border-line bg-bg/50 p-3">
+    <div className="flex items-start justify-between gap-4 rounded-xl border border-line bg-elevated p-3">
       <div>
         <label htmlFor={id} className="text-sm font-medium">{label}</label>
         {description && <p className="text-xs text-muted">{description}</p>}
@@ -74,7 +74,7 @@ export function Toggle({ checked, onChange, label, description }: { checked: boo
         onClick={() => onChange(!checked)}
         className={cx('relative h-7 w-12 shrink-0 rounded-full transition', checked ? 'bg-primary-strong' : 'bg-line')}
       >
-        <span className={cx('absolute top-1 size-5 rounded-full bg-white transition-all', checked ? 'left-6' : 'left-1')} />
+        <span className={cx('absolute top-1 size-5 rounded-full bg-white shadow transition-all', checked ? 'left-6' : 'left-1')} />
       </button>
     </div>
   );
@@ -83,7 +83,7 @@ export function Toggle({ checked, onChange, label, description }: { checked: boo
 export function StatusPill({ tone, children }: { tone: 'green' | 'amber' | 'gray' | 'red' | 'blue'; children: ReactNode }) {
   const tones = {
     green: 'border-success/40 bg-success/10 text-success',
-    amber: 'border-lead/40 bg-lead/10 text-lead',
+    amber: 'border-warn/40 bg-warn/10 text-warn',
     gray: 'border-line bg-elevated text-muted',
     red: 'border-danger/40 bg-danger/10 text-danger',
     blue: 'border-primary/40 bg-primary/10 text-glow',

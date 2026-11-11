@@ -31,6 +31,7 @@ export const candidateFixture: CandidateDTO = {
   vision: '',
   achievements: [],
   portrait: { url: '/media/a.jpg', width: 1000, height: 1250, altText: '', variants: [] },
+  portraitFocal: { x: 0.5, y: 0.39 },
   pose: {
     image: { url: '/media/a.jpg', width: 1000, height: 1250, altText: '', variants: [] },
     isPlaceholder: true,

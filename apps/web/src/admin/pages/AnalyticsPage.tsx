@@ -59,7 +59,7 @@ export default function AnalyticsPage() {
           <Card title="Engagement events">
             <ul className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
               {q.data.events.map((e) => (
-                <li key={e.type} className="flex justify-between rounded-lg bg-bg/60 px-3 py-2"><code className="text-muted">{e.type}</code><span className="tabular-nums">{e.count}</span></li>
+                <li key={e.type} className="flex justify-between rounded-lg bg-elevated px-3 py-2"><code className="text-muted">{e.type}</code><span className="tabular-nums">{e.count}</span></li>
               ))}
             </ul>
           </Card>

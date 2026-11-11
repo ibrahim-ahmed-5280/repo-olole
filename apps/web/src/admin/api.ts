@@ -41,6 +41,7 @@ export interface CandidateDraft {
   vision: string;
   achievements: string[];
   portraitAssetId: string | null;
+  portraitFocal?: Anchor;
   pose: { assetId: string | null; isPlaceholder: boolean; focal: Anchor; anchors: Record<'education' | 'unity' | 'leadership' | 'about', Anchor> };
 }
 
