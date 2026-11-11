@@ -33,7 +33,8 @@ systemctl is-active --quiet "$REVEAL_SERVICE" || die "$REVEAL_SERVICE is not run
 wait_for_health || die "THE REVEAL API is not healthy on 127.0.0.1:$REVEAL_PORT"
 nginx -t 2>/dev/null || die "the CURRENT nginx configuration is invalid — fix that first (nothing changed)"
 
-mapfile -t files < <(grep -rlE "server_name[^;]*[[:space:]]$DOMAIN_RE([[:space:];]|$)" /etc/nginx/sites-enabled /etc/nginx/conf.d 2>/dev/null || true)
+# -R (not -r): sites-enabled entries are usually symlinks, which grep -r skips during recursion.
+mapfile -t files < <(grep -RlE "server_name[^;]*[[:space:]]$DOMAIN_RE([[:space:];]|$)" /etc/nginx/sites-enabled /etc/nginx/conf.d 2>/dev/null || true)
 for f in "${files[@]}"; do [[ "$(basename "$f")" == "$NEW_NAME" ]] && die "already cut over ($f is active). Use 60-rollback.sh to go back."; done
 (( ${#files[@]} == 1 )) || die "expected exactly ONE enabled file serving $REVEAL_DOMAIN, found ${#files[@]}: ${files[*]:-none} — manual review needed"
 old_enabled="${files[0]}"; old_real="$(readlink -f "$old_enabled")"; old_is_link=0; [[ -L "$old_enabled" ]] && old_is_link=1
@@ -88,6 +89,7 @@ esac
 preview="$REVEAL_BACKUP_DIR/cutover-preview-$(ts)"; install -d -m 0700 "$preview"
 sandbox="$(mktemp -d)"; trap 'rm -rf "$sandbox"' EXIT
 cp -a /etc/nginx "$sandbox/"; S="$sandbox/nginx"
+# -r (not -R) on purpose: never follow symlinks into the LIVE /etc/nginx files.
 grep -rlI '/etc/nginx/' "$S" 2>/dev/null | xargs -r sed -i "s#/etc/nginx/#$S/#g"
 rm -f "$S/${old_enabled#/etc/nginx/}"
 install -d "$S/snippets"; cp "$SNIPPET_SRC" "$S/snippets/the-reveal-proxy.conf"

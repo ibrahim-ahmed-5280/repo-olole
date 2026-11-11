@@ -20,9 +20,13 @@ nproc | sed 's/^/CPUs: /'
 
 section "RUNTIMES"
 for b in node npm git mongosh mongod mongodump nginx certbot ufw; do
-  printf '%-10s ' "$b"; command -v "$b" >/dev/null && { "$b" --version 2>&1 | head -1; } || echo "(not installed)"
+  printf '%-10s ' "$b"
+  if ! command -v "$b" >/dev/null; then echo "(not installed)"; continue; fi
+  case "$b" in
+    nginx) nginx -v 2>&1 ;;
+    *) { "$b" --version 2>&1 || true; } | sed -n 1p ;;   # sed reads all input: no SIGPIPE/pipefail false negatives
+  esac
 done
-nginx -v 2>&1
 
 section "LISTENING TCP PORTS (process names)"
 ss -Hltnp 2>/dev/null | awk '{print $4, $6}' | sort -t: -k2 -n | uniq
@@ -45,7 +49,7 @@ section "NGINX — ALL server_name ENTRIES"
 nginx -T 2>/dev/null | grep -E '^\s*server_name' | sed 's/^\s*//' | sort | uniq -c
 
 section "NGINX — FILES THAT SERVE $REVEAL_DOMAIN"
-files=$(grep -rlE "server_name[^;]*\b${REVEAL_DOMAIN//./\\.}\b" /etc/nginx/sites-enabled /etc/nginx/conf.d 2>/dev/null)
+files=$(grep -RlE "server_name[^;]*\b${REVEAL_DOMAIN//./\\.}\b" /etc/nginx/sites-enabled /etc/nginx/conf.d 2>/dev/null)
 echo "${files:-'(none found in sites-enabled/ or conf.d/)'}"
 for f in $files; do
   echo "--- $f  →  $(readlink -f "$f")"
