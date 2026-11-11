@@ -24,8 +24,8 @@ SNIPPET_DST="/etc/nginx/snippets/the-reveal-proxy.conf"
 tenant_status() {  # "<hostname> <https status>" for every other hostname served by this nginx
   nginx -T 2>/dev/null | grep -E '^\s*server_name' | sed -E 's/^\s*server_name\s+//; s/;.*//' | tr ' ' '\n' \
     | grep -vE "^(_|$DOMAIN_RE|localhost|)$" | grep -vE '[~*]' | sort -u | while read -r h; do
-      printf '%s %s\n' "$h" "$(curl -sk -o /dev/null -w '%{http_code}' --max-time 8 --resolve "$h:443:127.0.0.1" "https://$h/")"
-    done
+      printf '%s %s\n' "$h" "$(curl -sk -o /dev/null -w '%{http_code}' --max-time 8 --resolve "$h:443:127.0.0.1" "https://$h/" || true)"
+    done || true   # an empty hostname list is not an error
 }
 
 # ── 1. Preconditions ─────────────────────────────────────────────────────────────────────────────────
@@ -38,32 +38,33 @@ mapfile -t files < <(grep -RlE "server_name[^;]*[[:space:]]$DOMAIN_RE([[:space:]
 for f in "${files[@]}"; do [[ "$(basename "$f")" == "$NEW_NAME" ]] && die "already cut over ($f is active). Use 60-rollback.sh to go back."; done
 (( ${#files[@]} == 1 )) || die "expected exactly ONE enabled file serving $REVEAL_DOMAIN, found ${#files[@]}: ${files[*]:-none} — manual review needed"
 old_enabled="${files[0]}"; old_real="$(readlink -f "$old_enabled")"; old_is_link=0; [[ -L "$old_enabled" ]] && old_is_link=1
-others="$(grep -E '^\s*server_name' "$old_real" | sed -E 's/^\s*server_name\s+//; s/;.*//' | tr ' ' '\n' | grep -vE "^(_|$DOMAIN_RE|www\.$DOMAIN_RE|)$" | sort -u | tr '\n' ' ')"
+others="$(grep -E '^\s*server_name' "$old_real" | sed -E 's/^\s*server_name\s+//; s/;.*//' | tr ' ' '\n' | grep -vE "^(_|$DOMAIN_RE|www\.$DOMAIN_RE|)$" | sort -u | tr '\n' ' ' || true)"
 [[ -z "$others" ]] || die "$old_real also serves: $others— it must be split manually first (see docs/NGINX_CUTOVER.md)"
 grep -qE 'listen[^;]*default_server' "$old_real" && die "$old_real holds a default_server — replacing it would change the catch-all site for other tenants; manual review needed"
 grep -qE "server_name[^;]*www\.$DOMAIN_RE" "$old_real" && warn "old block also lists www.$REVEAL_DOMAIN — not carried over (the certificate does not cover it)"
 ok "zdu block: $old_enabled → $old_real"
 
 # ── 2. Values reused from the existing zdu block ────────────────────────────────────────────────────
-cert="$(grep -E '^\s*ssl_certificate\s' "$old_real" | head -1 | awk '{print $2}' | tr -d ';')"
-key="$(grep -E '^\s*ssl_certificate_key\s' "$old_real" | head -1 | awk '{print $2}' | tr -d ';')"
+cert="$(grep -E '^\s*ssl_certificate\s' "$old_real" | head -1 | awk '{print $2}' | tr -d ';' || true)"
+key="$(grep -E '^\s*ssl_certificate_key\s' "$old_real" | head -1 | awk '{print $2}' | tr -d ';' || true)"
 : "${cert:=/etc/letsencrypt/live/$REVEAL_DOMAIN/fullchain.pem}"; : "${key:=/etc/letsencrypt/live/$REVEAL_DOMAIN/privkey.pem}"
 [[ -e "$cert" && -e "$key" ]] || die "certificate files not found ($cert / $key)"
 openssl x509 -in "$cert" -noout -checkend 604800 >/dev/null || warn "certificate expires within 7 days — renew first (certbot renew)"
 openssl x509 -in "$cert" -noout -ext subjectAltName 2>/dev/null | grep -q "DNS:$REVEAL_DOMAIN" || die "certificate does not cover $REVEAL_DOMAIN"
 ok "certificate: $cert (valid until $(openssl x509 -in "$cert" -noout -enddate | cut -d= -f2))"
 
-ssl_extra="$(grep -E '^\s*(include\s+/etc/letsencrypt/options-ssl-nginx\.conf|ssl_dhparam)\s' "$old_real" | sed -E 's/^\s*/    /' | sort -u || true)"
+# Certbot writes these as "include /etc/letsencrypt/options-ssl-nginx.conf;" — note the ';' right after the path.
+ssl_extra="$(grep -E '^\s*(include\s+/etc/letsencrypt/options-ssl-nginx\.conf|ssl_dhparam)[[:space:];]' "$old_real" | sed -E 's/^\s*/    /' | sort -u || true)"
 acme=""
 renewal="/etc/letsencrypt/renewal/$REVEAL_DOMAIN.conf"
 if [[ -f "$renewal" ]] && grep -qE '^\s*authenticator\s*=\s*webroot' "$renewal"; then
-  webroot="$(grep -E '^\s*webroot_path\s*=' "$renewal" | head -1 | sed -E 's/.*=\s*//; s/,.*//; s/\s+$//')"
+  webroot="$(grep -E '^\s*webroot_path\s*=' "$renewal" | head -1 | sed -E 's/.*=\s*//; s/,.*//; s/\s+$//' || true)"
   [[ -n "$webroot" ]] && acme="    location ^~ /.well-known/acme-challenge/ { root $webroot; }"
 fi
 info "certbot renewal: $( [[ -f "$renewal" ]] && grep -E '^\s*authenticator' "$renewal" | sed 's/ //g' || echo 'no renewal file found')"
 
 if grep -qE 'listen\s+\[::\]' "$old_real"; then ipv6=1; else ipv6=0; fi
-ngv="$(nginx -v 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
+ngv="$(nginx -v 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || true)"
 if [[ "$(printf '%s\n1.25.1\n' "$ngv" | sort -V | head -1)" == "1.25.1" ]]; then
   listen="    listen 443 ssl;"; (( ipv6 )) && listen+=$'\n    listen [::]:443 ssl;'; listen+=$'\n    http2 on;'
 else
@@ -71,11 +72,13 @@ else
 fi
 
 render() {  # $1 = path of the proxy snippet to reference
+  # bash 5.2 (Ubuntu 24.04) would treat '&' in replacement values as "the matched text" — switch that off.
+  shopt -u patsub_replacement 2>/dev/null || true
   local t; t="$(<"$TEMPLATE")"
   t="${t//@DOMAIN@/$REVEAL_DOMAIN}"; t="${t//@PORT@/$REVEAL_PORT}"; t="${t//@APP@/$REVEAL_APP}"
   t="${t//@SSL_CERT@/$cert}"; t="${t//@SSL_KEY@/$key}"; t="${t//@SSL_EXTRA@/$ssl_extra}"
   t="${t//@ACME_LOCATION@/$acme}"; t="${t//@LISTEN_443@/$listen}"; t="${t//@PROXY_SNIPPET@/$1}"
-  (( ipv6 )) || t="$(printf '%s\n' "$t" | grep -v 'listen \[::\]:80;')"
+  (( ipv6 )) || t="$(printf '%s\n' "$t" | grep -v 'listen \[::\]:80;' || true)"
   printf '%s\n' "$t"
 }
 

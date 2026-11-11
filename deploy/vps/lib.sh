@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Shared settings + helpers for THE REVEAL VPS scripts. Sourced by the numbered scripts.
 # Every value can be overridden from the environment, e.g.  REVEAL_PORT=4330 sudo -E bash 10-prepare.sh
-set -euo pipefail
+set -Eeuo pipefail
+# Safety net: never stop silently. Any unexpected failure prints where it happened.
+trap 'rc=$?; [[ $BASH_SUBSHELL -eq 0 ]] && printf "\e[31m✘ %s stopped unexpectedly at line %s (exit %s): %s\e[0m\n" "$(basename "$0")" "$LINENO" "$rc" "$BASH_COMMAND" >&2' ERR
 
 : "${REVEAL_DOMAIN:=zdu.elivateict.com}"
 : "${REVEAL_REPO:=https://github.com/ibrahim-ahmed-5280/repo-olole.git}"

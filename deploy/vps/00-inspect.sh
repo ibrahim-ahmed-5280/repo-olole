@@ -4,6 +4,7 @@
 # (sudo is only used to READ nginx config, listening-process names and certbot metadata.)
 source "$(dirname "$0")/lib.sh"
 set +e  # keep going even if some probes fail
+trap - ERR  # read-only probes are allowed to fail quietly
 
 section() { printf '\n==================== %s ====================\n' "$*"; }
 

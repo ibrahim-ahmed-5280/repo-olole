@@ -6,7 +6,7 @@
 #   sudo bash deploy/vps/60-rollback.sh /var/backups/the-reveal/nginx-cutover-<timestamp>
 source "$(dirname "$0")/lib.sh"
 need_root
-bk="${1:-$(ls -1dt "$REVEAL_BACKUP_DIR"/nginx-cutover-* 2>/dev/null | head -1)}"
+bk="${1:-$(ls -1dt "$REVEAL_BACKUP_DIR"/nginx-cutover-* 2>/dev/null | head -1 || true)}"
 [[ -n "$bk" && -f "$bk/manifest" ]] || die "no cutover backup found (expected $REVEAL_BACKUP_DIR/nginx-cutover-*/manifest)"
 # shellcheck disable=SC1091
 source "$bk/manifest"
@@ -35,7 +35,7 @@ if ! nginx -t 2>"$bk/nginx-t-rollback.txt"; then
 fi
 systemctl reload nginx
 sleep 2
-code="$(curl -sk -o /dev/null -w '%{http_code}' --max-time 10 --resolve "$REVEAL_DOMAIN:443:127.0.0.1" "https://$REVEAL_DOMAIN/")"
-title="$(curl -sk --max-time 10 --resolve "$REVEAL_DOMAIN:443:127.0.0.1" "https://$REVEAL_DOMAIN/" | grep -oiE '<title>[^<]*</title>' | head -1)"
+code="$(curl -sk -o /dev/null -w '%{http_code}' --max-time 10 --resolve "$REVEAL_DOMAIN:443:127.0.0.1" "https://$REVEAL_DOMAIN/" || true)"
+title="$(curl -sk --max-time 10 --resolve "$REVEAL_DOMAIN:443:127.0.0.1" "https://$REVEAL_DOMAIN/" | grep -oiE '<title>[^<]*</title>' | head -1 || true)"
 ok "previous site restored: HTTPS $code ${title}"
 info "THE REVEAL keeps running on 127.0.0.1:$REVEAL_PORT (database and uploads untouched)."

@@ -34,7 +34,7 @@ PROTECTED_PORTS=(27017 27018 27117)   # existing MongoDB instances on this serve
 
 tmp="$(mktemp -d)"; chmod 755 "$tmp"; trap 'cleanup_sandbox; rm -rf "$tmp"' EXIT
 sandbox_pid=""
-cleanup_sandbox() { [[ -n "$sandbox_pid" ]] && kill "$sandbox_pid" 2>/dev/null && wait "$sandbox_pid" 2>/dev/null; sandbox_pid=""; true; }
+cleanup_sandbox() { if [[ -n "$sandbox_pid" ]]; then kill "$sandbox_pid" 2>/dev/null || true; wait "$sandbox_pid" 2>/dev/null || true; fi; sandbox_pid=""; }
 
 listener_pid() { ss -Hltnp "sport = :$1" 2>/dev/null | grep -o 'pid=[0-9]*' | head -1 | cut -d= -f2; }
 

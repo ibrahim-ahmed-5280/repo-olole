@@ -7,7 +7,7 @@ need_root
 
 [[ "$REVEAL_PORT" != "$OLD_APP_PORT" ]] || die "REVEAL_PORT must not be $OLD_APP_PORT (old application)."
 if port_in_use "$REVEAL_PORT"; then
-  owner="$(ss -Hltnp "sport = :$REVEAL_PORT" | grep -o 'users:(("[^"]*' | cut -d'"' -f2)"
+  owner="$(ss -Hltnp "sport = :$REVEAL_PORT" | grep -o 'users:(("[^"]*' | cut -d'"' -f2 || true)"
   [[ "$owner" == node && "$(systemctl is-active "$REVEAL_SERVICE" 2>/dev/null)" == active ]] \
     && info "port $REVEAL_PORT is used by $REVEAL_SERVICE itself (re-run) — ok" \
     || die "port $REVEAL_PORT is already in use by '${owner:-unknown}'. Pick a free one: REVEAL_PORT=43xx sudo -E bash $0"
