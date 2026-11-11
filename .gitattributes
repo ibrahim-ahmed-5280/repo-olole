@@ -1,0 +1,5 @@
+# Shell scripts and server templates must keep LF endings (they run on Linux).
+*.sh text eol=lf
+deploy/** text eol=lf
+*.png binary
+*.jpg binary

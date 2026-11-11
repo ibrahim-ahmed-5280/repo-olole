@@ -1,0 +1,36 @@
+# THE REVEAL API — installed by deploy/vps/40-activate.sh (placeholders @…@ are filled in).
+[Unit]
+Description=THE REVEAL API (zdu.elivateict.com)
+Documentation=file://@ROOT@/app/docs/PRODUCTION_DEPLOYMENT_PLAN.md
+After=network-online.target mongod.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=@USER@
+Group=@USER@
+WorkingDirectory=@ROOT@/app/apps/api
+ExecStart=@NODE@ --env-file=@ENV_FILE@ dist/server.js
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=15
+# Logs go to journald:  journalctl -u @SERVICE@ -f
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=@SERVICE@
+
+# Hardening — the process can only write to the uploads directory.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+ReadWritePaths=@ROOT@/uploads
+ReadOnlyPaths=@ENV_FILE@
+
+[Install]
+WantedBy=multi-user.target

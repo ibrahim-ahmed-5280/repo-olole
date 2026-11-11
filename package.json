@@ -9,7 +9,7 @@
     "apps/*"
   ],
   "engines": {
-    "node": ">=20.11"
+    "node": ">=22.12"
   },
   "scripts": {
     "dev": "concurrently -n api,web -c blue,green \"npm run dev -w @reveal/api\" \"npm run dev -w @reveal/web\"",

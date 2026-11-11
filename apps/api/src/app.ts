@@ -62,7 +62,9 @@ export function createApp(config: AppConfig, logger: Logger, options: AppOptions
           'frame-ancestors': ["'none'"],
           'form-action': ["'self'"],
           'object-src': ["'none'"],
-          'upgrade-insecure-requests': config.isProd ? [] : null,
+          // Disabled on purpose: Nginx already redirects all public HTTP to HTTPS (with HSTS), and this
+          // directive would break the http://localhost SSH-tunnel staging check of the production build.
+          'upgrade-insecure-requests': null,
         },
       },
       crossOriginResourcePolicy: { policy: 'same-origin' },

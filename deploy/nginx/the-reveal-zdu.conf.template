@@ -1,0 +1,71 @@
+# THE REVEAL — @DOMAIN@
+# Rendered and installed ONLY by deploy/vps/50-nginx-cutover.sh (placeholders @…@ are filled in from the
+# previously active zdu server block: certificate paths, SSL includes and ACME webroot are reused as-is).
+# Names below are prefixed "the_reveal_" so they can't collide with other tenants on this server.
+
+limit_req_zone $binary_remote_addr zone=the_reveal_feedback:10m rate=6r/m;
+limit_req_zone $binary_remote_addr zone=the_reveal_login:10m rate=5r/m;
+
+upstream the_reveal_api {
+    server 127.0.0.1:@PORT@;   # loopback only — never exposed publicly
+    keepalive 16;
+}
+
+# HTTP → HTTPS (+ ACME challenge if the certificate renews via webroot)
+server {
+    listen 80;
+    listen [::]:80;
+    server_name @DOMAIN@;
+@ACME_LOCATION@
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+@LISTEN_443@
+    server_name @DOMAIN@;
+
+    ssl_certificate     @SSL_CERT@;
+    ssl_certificate_key @SSL_KEY@;
+@SSL_EXTRA@
+
+    server_tokens off;
+    client_max_body_size 10m;     # API accepts images up to MAX_UPLOAD_MB=8
+    access_log off;               # privacy: the API logs requests itself, without IP addresses
+
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml application/xml text/plain;
+
+    # Hashed, immutable build assets straight from disk.
+    location /assets/ {
+        alias @APP@/apps/web/dist/assets/;
+        try_files $uri =404;
+        expires 1y;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    }
+
+    # Extra edge rate limits in front of the API's own limits.
+    location = /api/v1/feedback {
+        limit_req zone=the_reveal_feedback burst=3 nodelay;
+        limit_req_status 429;
+        proxy_pass http://the_reveal_api;
+        include @PROXY_SNIPPET@;
+    }
+    location = /api/v1/admin/auth/login {
+        limit_req zone=the_reveal_login burst=3 nodelay;
+        limit_req_status 429;
+        proxy_pass http://the_reveal_api;
+        include @PROXY_SNIPPET@;
+    }
+
+    # Everything else — API (/api/v1), media (/media), robots/sitemap and the SPA (index.html + client-side
+    # routes such as /vision, /roadmap/*, /admin/*) — is served by the Node app, which also sets the CSP,
+    # HSTS and other security headers. /api/* never falls back to index.html (the API returns JSON 404s).
+    location / {
+        proxy_pass http://the_reveal_api;
+        include @PROXY_SNIPPET@;
+    }
+}

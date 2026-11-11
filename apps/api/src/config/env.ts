@@ -42,6 +42,8 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env) {
     if (!env.COOKIE_SECURE) throw new Error('COOKIE_SECURE must be true in production (serve over HTTPS).');
     if (/change-me/i.test(env.ANALYTICS_SECRET)) throw new Error('Set a real ANALYTICS_SECRET in production.');
     if (env.RATE_LIMIT_DISABLED) throw new Error('RATE_LIMIT_DISABLED is not allowed in production.');
+    if (!/^https:\/\//.test(env.PUBLIC_ORIGIN)) throw new Error('PUBLIC_ORIGIN must be an https:// URL in production.');
+    if (!path.isAbsolute(env.UPLOAD_DIR)) throw new Error('UPLOAD_DIR must be an absolute path in production.');
   }
   return {
     ...env,
