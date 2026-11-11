@@ -29,7 +29,8 @@ admin_js() {
 }
 
 # 1. Admin access: anonymous first (auth disabled), otherwise ask.
-probe="$(admin_js "print(db.adminCommand({listDatabases:1,nameOnly:true}).ok === 1 ? 'ADMIN_OK' : 'NO')")"
+# Anonymous probe: usersInfo only succeeds when authorization is disabled (listDatabases would answer ok:1, empty).
+probe="$(admin_js "try { db.runCommand({usersInfo: {forAllDBs: true}}); print('ADMIN_OK') } catch (e) { print('NEEDS_AUTH ' + e.codeName) }")"
 if ! grep -q ADMIN_OK <<<"$probe"; then
   if [[ -n "${MONGO_ADMIN_FILE:-}" ]]; then
     # Non-interactive: credentials saved by 12-mongodb-instance.sh (root 0600, lines user=/pass=/authdb=).

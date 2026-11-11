@@ -142,7 +142,9 @@ if (( ! already )); then
   sudo -u mongodb "$MONGOD" --config "$tmp/sandbox.conf" >"$tmp/sandbox.out" 2>&1 & sandbox_pid=$!
   up=0; for i in $(seq 1 30); do port_in_use "$sport" && { up=1; break; }; kill -0 "$sandbox_pid" 2>/dev/null || break; sleep 1; done
   if (( ! up )); then tail -20 "$tmp/sandbox.out" "$tmp/sandbox.log" >&2 2>/dev/null; die "MongoDB rejected the generated configuration — nothing was created"; fi
-  anon="$(mongosh --nodb --quiet --eval "try { connect('mongodb://127.0.0.1:$sport/admin?serverSelectionTimeoutMS=3000').adminCommand({listDatabases:1}); print('OPEN') } catch (e) { print('AUTH_ENFORCED') }" 2>&1 || true)"
+  # usersInfo is refused to anonymous clients whenever authorization is on — even before the first user exists.
+  # (listDatabases is NOT a valid test: on a fresh instance it answers ok:1 with an empty list.)
+  anon="$(mongosh --nodb --quiet --eval "try { connect('mongodb://127.0.0.1:$sport/admin?serverSelectionTimeoutMS=3000').runCommand({usersInfo:1}); print('OPEN') } catch (e) { print(e.codeName === 'Unauthorized' ? 'AUTH_ENFORCED' : 'ERROR ' + e.message) }" 2>&1 || true)"
   grep -q AUTH_ENFORCED <<<"$anon" || die "sandbox check: authentication is not enforced — nothing was created"
   grep -q '"cacheSizeGB":0.25' "$tmp/sandbox.log" || warn "could not confirm cacheSizeGB in the sandbox log (continuing)"
   cleanup_sandbox
@@ -192,7 +194,7 @@ systemctl is-active --quiet "$NAME" && systemctl is-enabled --quiet "$NAME" || d
 binds="$(ss -Hltn "sport = :$PORT" | awk '{print $4}' | sort -u | tr '\n' ' ')"
 [[ "$binds" == "127.0.0.1:$PORT " ]] || die "$NAME listens on unexpected addresses: $binds"
 ok "$NAME active, enabled at boot, listening ONLY on 127.0.0.1:$PORT"
-anon="$(mongosh --nodb --quiet --eval "try { connect('mongodb://127.0.0.1:$PORT/admin?serverSelectionTimeoutMS=3000').adminCommand({listDatabases:1}); print('OPEN') } catch (e) { print('AUTH_ENFORCED') }" 2>&1 || true)"
+anon="$(mongosh --nodb --quiet --eval "try { connect('mongodb://127.0.0.1:$PORT/admin?serverSelectionTimeoutMS=3000').runCommand({usersInfo:1}); print('OPEN') } catch (e) { print(e.codeName === 'Unauthorized' ? 'AUTH_ENFORCED' : 'ERROR ' + e.message) }" 2>&1 || true)"
 grep -q AUTH_ENFORCED <<<"$anon" || die "authentication is NOT enforced on $NAME"
 ok "anonymous access refused (authentication enforced)"
 changed=0
