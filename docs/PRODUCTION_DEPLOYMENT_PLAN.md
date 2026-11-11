@@ -13,7 +13,7 @@
 | Uploads | `/srv/the-reveal/uploads` | the only path the service can write |
 | Secrets | `/etc/the-reveal/api.env` (root:reveal 0640) | never in Git, logs or shell history |
 | API | `127.0.0.1:4320` (loopback only) — **only if free**, otherwise any free port via `REVEAL_PORT` | never 4310 (old app) |
-| Database | MongoDB `the_reveal`, user `reveal_app` with `readWrite` on `the_reveal` only | other databases untouched |
+| Database | **dedicated MongoDB instance** `mongod-the-reveal` on `127.0.0.1:27217` (own data dir, 0.25 GB cache, auth on); database `the_reveal`, user `reveal_app` with `readWrite` on `the_reveal` only | the existing `mongod` (27017), `mongod-fahanict`, `mongod-lattice` and Docker Mongo are untouched |
 | systemd | `the-reveal-api.service` | journald logs |
 | Nginx | new `the-reveal-zdu.conf` replacing **only** the zdu block, at cutover, after approval | old block kept in backup |
 | Backups | `/var/backups/the-reveal/` (root 0700) | DB + uploads + env, 14 days |
@@ -26,7 +26,7 @@ Architecture in production: `Browser → Nginx :443 (TLS, /assets from disk) →
 |---|---|---|---|---|
 | 0 | Read-only inspection, BEFORE report | `deploy/vps/00-inspect.sh` · [VPS_INSPECTION.md](VPS_INSPECTION.md) | no | Prepared — **owner must run** (no SSH access for the assistant) |
 | 1 | User, dirs, env file, repo mirror, port check | `deploy/vps/10-prepare.sh` | no | Prepared |
-| 2 | Dedicated MongoDB user + URI | `deploy/vps/15-mongodb.sh` | no | Prepared |
+| 2 | Dedicated MongoDB **instance** + admin + app user + URI | `deploy/vps/12-mongodb-instance.sh` (calls `15-mongodb.sh`) | no | Prepared · config + bootstrap Tested locally |
 | 3 | Build + tests in an isolated release dir | `deploy/vps/20-release.sh` | no | Prepared |
 | 4 | Indexes, starter content, owner account | `deploy/vps/30-database.sh` | no | Prepared |
 | 5 | systemd service on loopback port | `deploy/vps/40-activate.sh` | no | Prepared |
@@ -71,11 +71,12 @@ sudo apt-get install -y mongodb-database-tools mongodb-mongosh
 cd /tmp/the-reveal-deploy && sudo bash deploy/vps/10-prepare.sh
 ```
 
-### F. Isolated database user (`readWrite` on `the_reveal` only)
+### F. THE REVEAL's own MongoDB instance (no existing MongoDB password needed)
 ```bash
-cd /tmp/the-reveal-deploy && sudo bash deploy/vps/15-mongodb.sh
+cd /tmp/the-reveal-deploy && sudo bash deploy/vps/12-mongodb-instance.sh
 ```
-If MongoDB requires authentication you are asked (hidden input) for an admin connection string; it is used once and not stored.
+Creates `mongod-the-reveal.service` on `127.0.0.1:27217` (data `/var/lib/mongodb-the-reveal`, config `/etc/mongod-the-reveal.conf`, log `/var/log/mongodb/mongod-the-reveal.log`), creates its first admin through MongoDB's localhost exception with a generated password stored only in `/etc/the-reveal/mongo-admin.cred` (root 0600), then creates `reveal_app` and writes `MONGODB_URI`. Nothing is typed, nothing is shown.
+*(Alternative, only if you have the admin login of the shared MongoDB on 27017: `sudo bash deploy/vps/15-mongodb.sh`.)*
 
 ### G. Review the production env file (secrets stay on the server)
 ```bash

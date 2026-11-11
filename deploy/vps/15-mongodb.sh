@@ -31,10 +31,19 @@ admin_js() {
 # 1. Admin access: anonymous first (auth disabled), otherwise ask.
 probe="$(admin_js "print(db.adminCommand({listDatabases:1,nameOnly:true}).ok === 1 ? 'ADMIN_OK' : 'NO')")"
 if ! grep -q ADMIN_OK <<<"$probe"; then
-  info "MongoDB on $MONGO_HOSTPORT requires authentication for user management."
-  read -r -p "MongoDB admin username: " admin_user
-  read -r -s -p "MongoDB admin password (hidden): " admin_pass; echo
-  read -r -p "Authentication database [admin]: " admin_src
+  if [[ -n "${MONGO_ADMIN_FILE:-}" ]]; then
+    # Non-interactive: credentials saved by 12-mongodb-instance.sh (root 0600, lines user=/pass=/authdb=).
+    [[ -f "$MONGO_ADMIN_FILE" ]] || die "MONGO_ADMIN_FILE $MONGO_ADMIN_FILE not found"
+    admin_user="$(sed -n 's/^user=//p' "$MONGO_ADMIN_FILE")"
+    admin_pass="$(sed -n 's/^pass=//p' "$MONGO_ADMIN_FILE")"
+    admin_src="$(sed -n 's/^authdb=//p' "$MONGO_ADMIN_FILE")"
+    info "using saved admin credentials from $MONGO_ADMIN_FILE"
+  else
+    info "MongoDB on $MONGO_HOSTPORT requires authentication for user management."
+    read -r -p "MongoDB admin username: " admin_user
+    read -r -s -p "MongoDB admin password (hidden): " admin_pass; echo
+    read -r -p "Authentication database [admin]: " admin_src
+  fi
   [[ -n "$admin_user" && -n "$admin_pass" ]] || die "username and password are required — nothing was changed"
   printf '%s' "$admin_user" > "$tmp/admin_user"; printf '%s' "$admin_pass" > "$tmp/admin_pass"; printf '%s' "${admin_src:-admin}" > "$tmp/admin_src"
   chmod 600 "$tmp"/admin_*; unset admin_pass

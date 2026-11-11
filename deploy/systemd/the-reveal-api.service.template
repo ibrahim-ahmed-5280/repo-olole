@@ -2,7 +2,8 @@
 [Unit]
 Description=THE REVEAL API (zdu.elivateict.com)
 Documentation=file://@ROOT@/app/docs/PRODUCTION_DEPLOYMENT_PLAN.md
-After=network-online.target mongod.service
+After=network-online.target mongod.service mongod-the-reveal.service
+Wants=mongod-the-reveal.service
 Wants=network-online.target
 
 [Service]

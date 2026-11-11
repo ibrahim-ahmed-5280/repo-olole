@@ -43,9 +43,18 @@ Renewed by the existing Certbot timer; THE REVEAL's Nginx block reuses the same 
 sudo certbot renew --dry-run --cert-name zdu.elivateict.com
 ```
 
-## Rotate the database password
+## THE REVEAL's MongoDB instance
 ```bash
-sudo bash /srv/the-reveal/app/deploy/vps/15-mongodb.sh
+sudo systemctl status mongod-the-reveal --no-pager
+```
+```bash
+sudo tail -50 /var/log/mongodb/mongod-the-reveal.log
+```
+Admin login for this instance (root only): `/etc/the-reveal/mongo-admin.cred`.
+
+## Rotate the app's database password
+```bash
+sudo MONGO_HOSTPORT=127.0.0.1:27217 MONGO_ADMIN_FILE=/etc/the-reveal/mongo-admin.cred bash /srv/the-reveal/app/deploy/vps/15-mongodb.sh
 ```
 
 ## Health watch (any uptime monitor)

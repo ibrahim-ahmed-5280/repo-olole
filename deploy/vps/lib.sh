@@ -15,6 +15,7 @@ set -euo pipefail
 : "${REVEAL_SERVICE:=the-reveal-api}"
 : "${REVEAL_DB:=the_reveal}"
 : "${REVEAL_DB_USER:=reveal_app}"
+: "${REVEAL_MONGO_PORT:=27217}"                 # dedicated MongoDB instance (12-mongodb-instance.sh)
 : "${OLD_APP_PORT:=4310}"                       # old Zakariye Digital Universe API — never touched
 
 REVEAL_RELEASES="$REVEAL_ROOT/releases"

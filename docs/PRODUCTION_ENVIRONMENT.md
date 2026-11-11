@@ -7,7 +7,7 @@ File: `/etc/the-reveal/api.env` — owner `root`, group `reveal`, mode `0640`. C
 | `NODE_ENV` | `production` | enables production guards (below), HSTS, safe errors |
 | `HOST` | `127.0.0.1` | API never listens publicly |
 | `PORT` | `4320` (or another verified-free port) | not 4310 (old app) |
-| `MONGODB_URI` | `mongodb://reveal_app:<generated>@127.0.0.1:27017/the_reveal?authSource=the_reveal` | dedicated user, `readWrite` on `the_reveal` only |
+| `MONGODB_URI` | `mongodb://reveal_app:<generated>@127.0.0.1:27217/the_reveal?authSource=the_reveal` | dedicated instance `mongod-the-reveal` (27217) and dedicated user, `readWrite` on `the_reveal` only |
 | `PUBLIC_ORIGIN` | `https://zdu.elivateict.com` | canonical/sitemap/robots; **must be https** in production |
 | `ALLOWED_ORIGINS` | `https://zdu.elivateict.com,http://localhost:4320` during staging → `https://zdu.elivateict.com` after cutover (removed automatically) | CORS + Origin check on mutations |
 | `ANALYTICS_SECRET` | 64 random chars (generated) | daily-rotating session hashing |
