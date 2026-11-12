@@ -10,8 +10,8 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
 const VARIANTS: Record<Variant, string> = {
   primary:
-    'bg-primary text-white shadow-[var(--shadow-float)] hover:bg-primary-strong active:brightness-95',
-  secondary: 'glass text-ink hover:border-primary/60 hover:bg-elevated/80',
+    'bg-primary text-white hover:bg-primary-strong active:bg-primary-strong',
+  secondary: 'border border-line bg-surface text-ink hover:border-primary/50 hover:bg-primary/5',
   ghost: 'text-muted hover:text-ink hover:bg-ink/5',
   danger: 'bg-danger text-white hover:brightness-110',
 };

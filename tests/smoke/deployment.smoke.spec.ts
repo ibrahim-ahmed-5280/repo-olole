@@ -121,7 +121,8 @@ test.describe('public experience', () => {
       await expect(page.getByRole('heading', { level: 1 })).toHaveText(name);
       expect(await page.getByRole('heading', { level: 3 }).count()).toBeGreaterThan(0);
       await page.getByTestId('roadmap-conclusion').scrollIntoViewIfNeeded();
-      await expect(page.getByTestId('feedback-form').or(page.getByTestId('feedback-success'))).toBeVisible();
+      // The feedback popup opens after finishing a pillar (or the card shows it was already submitted).
+      await expect(page.getByTestId('feedback-form').or(page.getByTestId('feedback-success')).first()).toBeVisible();
       expect(errors).toEqual([]);
     });
   }
@@ -164,7 +165,7 @@ test.describe('public experience', () => {
     test.skip(process.env.SMOKE_WRITE !== '1', 'read-only run — set SMOKE_WRITE=1 to submit one labelled feedback entry');
     await fresh(page, '/roadmap/waxbarasho');
     await page.getByTestId('roadmap-conclusion').scrollIntoViewIfNeeded();
-    const form = page.getByTestId('feedback-form');
+    const form = page.getByRole('dialog').getByTestId('feedback-form');
     await form.getByText('Haa').click();
     await form.getByRole('textbox').fill(`[deployment smoke test ${new Date().toISOString()}] please hide`);
     const [res] = await Promise.all([

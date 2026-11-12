@@ -9,11 +9,13 @@ import { PublishBar, VersionHistory } from '../components/publishing';
 import { MediaPicker } from '../components/media';
 import { FacePointEditor, HotspotEditor } from '../components/HotspotEditor';
 
-type Form = Omit<CandidateDraft, 'id' | 'education' | 'experience' | 'skills' | 'achievements'> & {
+type EnForm = { title: string; introduction: string; biography: string; motivation: string; vision: string; education: string; experience: string; skills: string; achievements: string };
+type Form = Omit<CandidateDraft, 'id' | 'education' | 'experience' | 'skills' | 'achievements' | 'en'> & {
   education: string;
   experience: string;
   skills: string;
   achievements: string;
+  en: EnForm;
 };
 
 const toForm = (d: CandidateDraft): Form => ({
@@ -22,6 +24,11 @@ const toForm = (d: CandidateDraft): Form => ({
   experience: d.experience.join('\n'),
   skills: d.skills.join('\n'),
   achievements: d.achievements.join('\n'),
+  en: {
+    title: d.en?.title ?? '', introduction: d.en?.introduction ?? '', biography: d.en?.biography ?? '', motivation: d.en?.motivation ?? '', vision: d.en?.vision ?? '',
+    education: (d.en?.education ?? []).join('\n'), experience: (d.en?.experience ?? []).join('\n'),
+    skills: (d.en?.skills ?? []).join('\n'), achievements: (d.en?.achievements ?? []).join('\n'),
+  },
 });
 
 export default function CandidatePage() {
@@ -51,6 +58,13 @@ export default function CandidatePage() {
       portraitAssetId: rest.portraitAssetId,
       portraitFocal: rest.portraitFocal ?? { x: 0.5, y: 0.36 },
       pose: { assetId: rest.pose.assetId, isPlaceholder: rest.pose.isPlaceholder, focal: rest.pose.focal, anchors: rest.pose.anchors },
+      en: {
+        ...rest.en,
+        education: linesToList(rest.en.education),
+        experience: linesToList(rest.en.experience),
+        skills: linesToList(rest.en.skills),
+        achievements: linesToList(rest.en.achievements),
+      },
     });
   }, [adminKeys.candidate]);
 
@@ -65,6 +79,18 @@ export default function CandidatePage() {
   );
   const area = (k: 'introduction' | 'biography' | 'motivation' | 'vision' | 'education' | 'experience' | 'skills' | 'achievements', label: string, hint?: string, rows = 4) => (
     <Field label={label} hint={hint}>{(id, d) => <TextArea id={id} rows={rows} aria-describedby={d} value={form[k]} onChange={(e) => set(k, e.target.value)} disabled={!canWrite} />}</Field>
+  );
+
+  const enField = (k: keyof EnForm, label: string, rows = 3) => (
+    <Field label={label}>
+      {(id) =>
+        rows === 1 ? (
+          <TextInput id={id} lang="en" value={form.en[k]} onChange={(e) => set('en', { ...form.en, [k]: e.target.value })} disabled={!canWrite} />
+        ) : (
+          <TextArea id={id} lang="en" rows={rows} value={form.en[k]} onChange={(e) => set('en', { ...form.en, [k]: e.target.value })} disabled={!canWrite} />
+        )
+      }
+    </Field>
   );
 
   return (
@@ -100,6 +126,22 @@ export default function CandidatePage() {
             </div>
             {area('motivation', 'Motivation for candidacy')}
             {area('vision', 'Leadership vision')}
+          </div>
+        </Card>
+        <Card title="English translation (optional)">
+          <p className="mb-4 text-sm text-muted">Shown when a visitor switches the site to English. Empty fields fall back to the Somali text.</p>
+          <div className="grid gap-4">
+            {enField('title', 'Title / role line (English)', 1)}
+            {enField('introduction', 'Short introduction (English)')}
+            {enField('biography', 'Biography (English)', 6)}
+            <div className="grid gap-4 md:grid-cols-2">
+              {enField('education', 'Educational background (English, one per line)')}
+              {enField('experience', 'Relevant experience (English, one per line)')}
+              {enField('skills', 'Skills (English, one per line)')}
+              {enField('achievements', 'Verified achievements (English, one per line)')}
+            </div>
+            {enField('motivation', 'Motivation for candidacy (English)')}
+            {enField('vision', 'Leadership vision (English)')}
           </div>
         </Card>
         <Card title="Photos">

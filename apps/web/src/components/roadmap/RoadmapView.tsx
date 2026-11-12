@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { motion } from 'motion/react';
-import { ArrowLeft, ArrowRight, Flag } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Flag, MessageSquareText } from 'lucide-react';
 import { otherPillars, roadmapProgress, type PillarDTO, type RoadmapDTO } from '@reveal/shared';
 import { useT } from '../../i18n';
 import { track } from '../../lib/analytics';
 import { useReducedMotionPref } from '../../lib/motion';
 import { PILLAR_THEME, themeStyle } from '../../lib/theme';
-import { FeedbackForm } from '../feedback/FeedbackForm';
+import { FeedbackForm, wasSubmitted } from '../feedback/FeedbackForm';
+import { Dialog } from '../ui/Dialog';
+import { Button } from '../ui/primitives';
 import { Icon } from '../ui/Icon';
 import { RoadmapControls } from './RoadmapControls';
 import { RoadmapMilestone } from './RoadmapMilestone';
@@ -35,6 +37,9 @@ export function RoadmapView({ roadmap, pillars, preview, linkPrefix = '' }: Prop
   const pathRef = useRef<HTMLOListElement>(null);
   const itemRefs = useRef<Array<HTMLLIElement | null>>([]);
   const conclusionRef = useRef<HTMLElement>(null);
+  /** Sentinel right after the last milestone: reaching it means the visitor scrolled through every milestone. */
+  const endRef = useRef<HTMLDivElement>(null);
+  const [finished, setFinished] = useState(false);
   const [active, setActive] = useState(0);
   const [reached, setReached] = useState(-1);
   const [complete, setComplete] = useState(false);
@@ -42,6 +47,53 @@ export function RoadmapView({ roadmap, pillars, preview, linkPrefix = '' }: Prop
   const navLockUntil = useRef(0);
   const total = roadmap.milestones.length;
   const route = `/roadmap/${roadmap.slug}`;
+  const [submitted, setSubmitted] = useState(() => wasSubmitted(roadmap.slug));
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  useEffect(() => setSubmitted(wasSubmitted(roadmap.slug)), [roadmap.slug]);
+
+  /*
+   * Automatic feedback — fully independent per pillar.
+   * Each pillar has its own session key (feedback_auto_shown_waxbarasho / _midnimo / _hoggaan) and its own
+   * "submitted" key, so finishing, dismissing or submitting one pillar never affects another.
+   * The key is written only at the moment the popup actually opens, so re-renders can't swallow the popup.
+   */
+  const autoShownKey = `feedback_auto_shown_${roadmap.slug}`;
+  const autoShownRef = useRef(false); // fallback when sessionStorage is unavailable
+  const alreadyAutoShown = useCallback(() => {
+    if (autoShownRef.current) return true;
+    try {
+      return sessionStorage.getItem(autoShownKey) === '1';
+    } catch {
+      return false;
+    }
+  }, [autoShownKey]);
+  const shouldPrompt = (finished || complete) && !preview && !submitted;
+  useEffect(() => {
+    if (!shouldPrompt || alreadyAutoShown()) return;
+    const id = window.setTimeout(() => {
+      if (alreadyAutoShown()) return;
+      autoShownRef.current = true;
+      try {
+        sessionStorage.setItem(autoShownKey, '1');
+      } catch {
+        /* ignore */
+      }
+      setFeedbackOpen(true);
+    }, reduced ? 0 : 350);
+    return () => window.clearTimeout(id);
+  }, [shouldPrompt, alreadyAutoShown, autoShownKey, reduced]);
+
+  // Detect the end of the actual final milestone (any number of milestones). Only real scrolling counts —
+  // never page load — and fast scrolls are caught because we test "end is at or above the viewport bottom".
+  useEffect(() => {
+    if (finished || total === 0) return;
+    const check = () => {
+      const el = endRef.current;
+      if (el && el.getBoundingClientRect().top <= window.innerHeight) setFinished(true);
+    };
+    window.addEventListener('scroll', check, { passive: true });
+    return () => window.removeEventListener('scroll', check);
+  }, [finished, total]);
 
   useEffect(() => {
     if (!preview) track({ type: 'roadmap_view', route, pillar: roadmap.slug });
@@ -160,6 +212,7 @@ export function RoadmapView({ roadmap, pillars, preview, linkPrefix = '' }: Prop
                 />
               ))}
             </ol>
+            <div ref={endRef} aria-hidden className="h-px w-full" data-testid="milestones-end" />
             {/* Rendered after the list so the list's ref exists when the path measures it; z-0 keeps it behind the cards. */}
             <RoadmapPath containerRef={pathRef} variant={roadmap.theme} color={theme.color} milestoneCount={total} />
           </div>
@@ -177,8 +230,28 @@ export function RoadmapView({ roadmap, pillars, preview, linkPrefix = '' }: Prop
             {roadmap.conclusion && <p className="mx-auto mt-3 max-w-xl text-muted">{roadmap.conclusion}</p>}
           </div>
 
-          <div className="mt-10">
-            <FeedbackForm pillar={roadmap.slug} disabled={preview} />
+          <div className="mt-10 rounded-[var(--radius-card)] border border-line bg-surface p-5 sm:p-6" data-testid="feedback-card">
+            {submitted ? (
+              <p className="flex items-center gap-3 font-semibold" data-testid="feedback-success">
+                <CheckCircle2 className="size-6 shrink-0 text-success" aria-hidden />
+                {t.feedback.success}
+              </p>
+            ) : (
+              <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <span className="grid size-11 shrink-0 place-items-center rounded-full" style={{ background: theme.soft, color: theme.color }}>
+                    <MessageSquareText className="size-5" aria-hidden />
+                  </span>
+                  <div>
+                    <h3 className="font-display text-lg font-bold">{t.feedback.heading}</h3>
+                    <p className="mt-0.5 text-sm text-muted">{t.feedback.question}</p>
+                  </div>
+                </div>
+                <Button onClick={() => setFeedbackOpen(true)} className="w-full sm:w-auto" data-testid="feedback-open">
+                  {t.feedback.open}
+                </Button>
+              </div>
+            )}
           </div>
 
           <nav aria-labelledby="others-heading" className="mt-12">
@@ -211,6 +284,23 @@ export function RoadmapView({ roadmap, pillars, preview, linkPrefix = '' }: Prop
           </nav>
         </section>
       </main>
+
+      <Dialog
+        open={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+        title={`${t.feedback.popupTitle} — ${roadmap.name}`}
+        closeLabel={t.about.close}
+        side="center"
+        testId="feedback-dialog"
+      >
+        <FeedbackForm
+          pillar={roadmap.slug}
+          disabled={preview}
+          variant="dialog"
+          onSkip={() => setFeedbackOpen(false)}
+          onSubmitted={() => setSubmitted(true)}
+        />
+      </Dialog>
 
       <RoadmapControls
         milestones={roadmap.milestones}

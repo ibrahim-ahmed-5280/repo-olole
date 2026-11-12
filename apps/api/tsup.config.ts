@@ -7,6 +7,7 @@ export default defineConfig({
     'cli/seed': 'src/cli/seed.ts',
     'cli/create-admin': 'src/cli/create-admin.ts',
     'cli/import-portrait': 'src/cli/import-portrait.ts',
+    'cli/migrate': 'src/cli/migrate.ts',
   },
   format: ['esm'],
   platform: 'node',

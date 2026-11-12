@@ -24,6 +24,7 @@
     "test:e2e": "npm run build -w @reveal/web && playwright test",
     "db:init": "npm run db:init -w @reveal/api",
     "db:seed": "npm run db:seed -w @reveal/api",
+    "db:migrate": "npm run db:migrate -w @reveal/api",
     "admin:create": "cd apps/api && tsx --env-file-if-exists=../../.env src/cli/create-admin.ts",
     "media:import-portrait": "cd apps/api && tsx --env-file-if-exists=../../.env src/cli/import-portrait.ts"
   },

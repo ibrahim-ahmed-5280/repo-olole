@@ -30,6 +30,23 @@ async function imagesById(ids: Array<unknown>) {
 
 const iso = (d: Date | null | undefined) => (d ? d.toISOString() : null);
 
+/** Copies only non-empty English fields (strings trimmed, non-empty arrays); undefined when nothing is translated. */
+export function cleanEn<T extends object>(raw: unknown, keys: readonly (keyof T)[]): T | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const src = raw as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+  for (const k of keys as readonly string[]) {
+    const v = src[k];
+    if (typeof v === 'string' && v.trim()) out[k] = v;
+    else if (Array.isArray(v) && v.length) out[k] = [...v];
+  }
+  return Object.keys(out).length ? (out as T) : undefined;
+}
+const CANDIDATE_EN_KEYS = ['title', 'introduction', 'biography', 'education', 'experience', 'skills', 'motivation', 'vision', 'achievements'] as const;
+const PILLAR_EN_KEYS = ['name', 'subtitle', 'tagline', 'description', 'conclusion'] as const;
+const MILESTONE_EN_KEYS = ['title', 'summary', 'description', 'problem', 'solution', 'implementation', 'expectedBenefit', 'timeframe'] as const;
+const SETTINGS_EN_KEYS = ['tagline', 'campaignContext', 'maintenanceMessage', 'privacyNotice'] as const;
+
 // ───────────────────────── Candidate ─────────────────────────
 
 export async function getCandidateDoc() {
@@ -65,6 +82,7 @@ export async function buildCandidateDTO(doc: Awaited<ReturnType<typeof getCandid
         about: anchors?.about?.x != null ? anchors.about : DEFAULT_ANCHORS.about,
       },
     },
+    en: cleanEn<NonNullable<CandidateDTO['en']>>(doc.en, CANDIDATE_EN_KEYS),
     version: doc.publishedVersion ?? null,
     publishedAt: iso(doc.publishedAt),
   };
@@ -102,6 +120,7 @@ function milestoneDTO(m: MilestoneLean, imgs: Map<string, ReturnType<typeof toPu
     order: m.order,
     status: (m.status ?? 'active') as MilestoneDTO['status'],
     isExample: !!m.isExample,
+    en: cleanEn<NonNullable<MilestoneDTO['en']>>(m.en, MILESTONE_EN_KEYS),
   };
 }
 
@@ -117,6 +136,7 @@ function pillarDTO(p: PillarDoc, milestoneCount: number): PillarDTO {
     theme: p.theme as PillarDTO['theme'],
     order: p.order,
     milestoneCount,
+    en: cleanEn<NonNullable<PillarDTO['en']>>(p.en, PILLAR_EN_KEYS),
   };
 }
 
@@ -156,6 +176,7 @@ export function buildSettingsDTO(doc: Awaited<ReturnType<typeof getSettingsDoc>>
     maintenanceMessage: doc.maintenanceMessage,
     socialLinks: doc.socialLinks.map((l) => ({ label: l.label ?? '', url: l.url ?? '' })),
     privacyNotice: doc.privacyNotice,
+    en: cleanEn<NonNullable<SiteSettingsDTO['en']>>(doc.en, SETTINGS_EN_KEYS),
     publishedAt: iso(doc.publishedAt),
   };
 }
@@ -234,20 +255,20 @@ export async function restoreVersion(versionId: string) {
   if (v.entityType === 'candidate') {
     const raw = snap._raw as Record<string, unknown> | undefined;
     if (!raw) throw new ApiError(422, 'NOT_RESTORABLE', 'This version cannot be restored');
-    const fields = ['name', 'title', 'introduction', 'biography', 'education', 'experience', 'skills', 'motivation', 'vision', 'achievements', 'portraitAssetId', 'portraitFocal', 'pose'];
+    const fields = ['name', 'title', 'introduction', 'biography', 'education', 'experience', 'skills', 'motivation', 'vision', 'achievements', 'portraitAssetId', 'portraitFocal', 'pose', 'en'];
     const doc = await getCandidateDoc();
     for (const f of fields) doc.set(f, raw[f]);
     doc.draftUpdatedAt = new Date();
     await doc.save();
   } else if (v.entityType === 'settings') {
     const doc = await getSettingsDoc();
-    const fields = ['branding', 'animationsEnabled', 'introEnabled', 'maintenanceMode', 'maintenanceMessage', 'socialLinks', 'privacyNotice'];
+    const fields = ['branding', 'animationsEnabled', 'introEnabled', 'maintenanceMode', 'maintenanceMessage', 'socialLinks', 'privacyNotice', 'en'];
     for (const f of fields) doc.set(f, snap[f]);
     doc.draftUpdatedAt = new Date();
     await doc.save();
   } else {
     const pillar = await getPillarDoc(v.entityId as PillarSlug);
-    for (const f of ['name', 'subtitle', 'tagline', 'description', 'conclusion', 'icon', 'theme']) pillar.set(f, snap[f]);
+    for (const f of ['name', 'subtitle', 'tagline', 'description', 'conclusion', 'icon', 'theme', 'en']) pillar.set(f, snap[f] ?? (f === 'en' ? {} : undefined));
     pillar.draftUpdatedAt = new Date();
     await pillar.save();
     const raw = (snap._rawMilestones as Array<Record<string, unknown>> | undefined) ?? [];

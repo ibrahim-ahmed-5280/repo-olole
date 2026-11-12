@@ -110,6 +110,46 @@ export type HotspotAnchors = z.infer<typeof hotspotAnchorsSchema>;
 
 const listOfText = (maxItems: number, maxLen: number) => z.array(requiredText(maxLen)).max(maxItems);
 
+/*
+ * English translations. Somali is the primary content language; every public text can carry an optional
+ * English version under `en`. Empty English fields fall back to Somali on the public site.
+ */
+export const candidateEnSchema = z
+  .object({
+    title: text(160),
+    introduction: text(600),
+    biography: text(5000),
+    education: listOfText(20, 300),
+    experience: listOfText(20, 300),
+    skills: listOfText(40, 80),
+    motivation: text(2000),
+    vision: text(2000),
+    achievements: listOfText(20, 300),
+  })
+  .partial()
+  .strict();
+export const pillarEnSchema = z
+  .object({ name: text(40), subtitle: text(80), tagline: text(160), description: text(1500), conclusion: text(1500) })
+  .partial()
+  .strict();
+export const milestoneEnSchema = z
+  .object({
+    title: text(140),
+    summary: text(400),
+    description: text(3000),
+    problem: text(1500),
+    solution: text(1500),
+    implementation: text(1500),
+    expectedBenefit: text(1500),
+    timeframe: text(80),
+  })
+  .partial()
+  .strict();
+export const settingsEnSchema = z
+  .object({ tagline: text(160), campaignContext: text(300), maintenanceMessage: text(400), privacyNotice: text(8000) })
+  .partial()
+  .strict();
+
 export const candidateUpdateSchema = z
   .object({
     name: requiredText(120),
@@ -131,6 +171,7 @@ export const candidateUpdateSchema = z
       focal: anchorSchema,
       anchors: hotspotAnchorsSchema,
     }),
+    en: candidateEnSchema,
   })
   .partial()
   .strict();
@@ -145,6 +186,7 @@ export const pillarUpdateSchema = z
     conclusion: text(1500),
     icon: z.enum(ICON_NAMES),
     theme: z.enum(PILLAR_THEMES),
+    en: pillarEnSchema,
   })
   .partial()
   .strict();
@@ -164,6 +206,7 @@ export const milestoneInputSchema = z
     illustrationAssetId: objectIdSchema.nullable().optional(),
     status: z.enum(MILESTONE_STATUSES).default('active'),
     isExample: z.boolean().default(false),
+    en: milestoneEnSchema.optional(),
   })
   .strict();
 export type MilestoneInput = z.infer<typeof milestoneInputSchema>;
@@ -196,6 +239,7 @@ export const settingsUpdateSchema = z
       )
       .max(10),
     privacyNotice: text(8000),
+    en: settingsEnSchema,
   })
   .partial()
   .strict();

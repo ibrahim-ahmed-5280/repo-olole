@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { ArrowDown, ArrowLeft, ArrowUp, Pencil, Plus, Save, Trash2 } from 'lucide-react';
-import { ICON_NAMES, PILLAR_THEMES, hasPermission, isPillarSlug, type IconName, type PillarSlug } from '@reveal/shared';
+import { ICON_NAMES, PILLAR_THEMES, hasPermission, isPillarSlug, type IconName, type MilestoneEn, type PillarEn, type PillarSlug } from '@reveal/shared';
 import { api } from '../../lib/api';
 import { Button, ErrorState, Spinner } from '../../components/ui/primitives';
 import { Dialog } from '../../components/ui/Dialog';
@@ -26,7 +26,27 @@ const EMPTY_MILESTONE: MilestoneForm = {
   illustrationAssetId: null,
   status: 'active',
   isExample: false,
+  en: {},
 };
+
+const MILESTONE_EN_FIELDS: Array<[keyof MilestoneEn, string, number]> = [
+  ['title', 'Title (English)', 1],
+  ['summary', 'Short description (English)', 2],
+  ['description', 'Detailed explanation (English)', 3],
+  ['problem', 'Problem statement (English)', 2],
+  ['solution', 'Proposed solution (English)', 2],
+  ['implementation', 'Implementation method (English)', 3],
+  ['expectedBenefit', 'Expected benefit (English)', 2],
+  ['timeframe', 'Timeframe (English)', 1],
+];
+
+const PILLAR_EN_FIELDS: Array<[keyof PillarEn, string, number]> = [
+  ['name', 'Name (English)', 1],
+  ['subtitle', 'Subtitle (English)', 1],
+  ['tagline', 'Tagline (English)', 1],
+  ['description', 'Description (English)', 3],
+  ['conclusion', 'Conclusion text (English)', 2],
+];
 
 function MilestoneEditor({ slug, initial, onClose }: { slug: PillarSlug; initial: MilestoneForm; onClose: () => void }) {
   const toast = useToast();
@@ -36,7 +56,7 @@ function MilestoneEditor({ slug, initial, onClose }: { slug: PillarSlug; initial
     const body = {
       title: f.title, summary: f.summary, description: f.description, problem: f.problem, solution: f.solution,
       implementation: f.implementation, expectedBenefit: f.expectedBenefit, timeframe: f.timeframe, icon: f.icon,
-      illustrationAssetId: f.illustrationAssetId, status: f.status, isExample: f.isExample,
+      illustrationAssetId: f.illustrationAssetId, status: f.status, isExample: f.isExample, en: f.en ?? {},
     };
     return f.id ? api.patch(`/admin/milestones/${f.id}`, body) : api.post('/admin/milestones', { ...body, pillar: slug });
   }, keys);
@@ -70,9 +90,26 @@ function MilestoneEditor({ slug, initial, onClose }: { slug: PillarSlug; initial
           )}
         </Field>
       </div>
+      <details className="rounded-xl border border-line p-4" open={!!m.en && Object.values(m.en).some(Boolean)}>
+        <summary className="cursor-pointer text-sm font-semibold">English translation (optional)</summary>
+        <p className="mt-2 text-xs text-muted">Shown when a visitor switches to English. Empty fields fall back to Somali.</p>
+        <div className="mt-3 space-y-3">
+          {MILESTONE_EN_FIELDS.map(([k, label, rows]) => (
+            <Field key={k} label={label}>
+              {(id) =>
+                rows === 1 ? (
+                  <TextInput id={id} lang="en" value={m.en?.[k] ?? ''} onChange={(e) => set('en', { ...m.en, [k]: e.target.value })} />
+                ) : (
+                  <TextArea id={id} lang="en" rows={rows} value={m.en?.[k] ?? ''} onChange={(e) => set('en', { ...m.en, [k]: e.target.value })} />
+                )
+              }
+            </Field>
+          ))}
+        </div>
+      </details>
       <MediaPicker label="Optional illustration" value={m.illustrationAssetId} onChange={(id) => set('illustrationAssetId', id)} />
       <Toggle label="Visible on the roadmap" description="Hidden milestones stay in the draft but are not published." checked={m.status === 'active'} onChange={(v) => set('status', v ? 'active' : 'hidden')} />
-      <Toggle label="Example / placeholder content" description="Shows a public 'Tusaale' badge. Turn off once the text is approved." checked={m.isExample} onChange={(v) => set('isExample', v)} />
+      <Toggle label="Example / placeholder content" description="Shows a public 'Tusaale' / 'Example' badge. Leave off for approved text." checked={m.isExample} onChange={(v) => set('isExample', v)} />
       <div className="flex justify-end gap-2 pt-2">
         <Button variant="ghost" onClick={onClose}>Cancel</Button>
         <Button type="submit" loading={save.isPending} icon={<Save className="size-4" aria-hidden />} data-testid="save-milestone">Save milestone</Button>
@@ -86,7 +123,7 @@ function PillarForm({ pillar, slug, canWrite }: { pillar: PillarDraft; slug: Pil
   const [p, setP] = useState(pillar);
   useEffect(() => setP(pillar), [pillar]);
   const save = useAdminMutation(
-    (x: PillarDraft) => api.patch(`/admin/pillars/${slug}`, { name: x.name, subtitle: x.subtitle, tagline: x.tagline, description: x.description, conclusion: x.conclusion, icon: x.icon, theme: x.theme }),
+    (x: PillarDraft) => api.patch(`/admin/pillars/${slug}`, { name: x.name, subtitle: x.subtitle, tagline: x.tagline, description: x.description, conclusion: x.conclusion, icon: x.icon, theme: x.theme, en: x.en ?? {} }),
     [adminKeys.pillar(slug), adminKeys.pillars],
   );
   const set = <K extends keyof PillarDraft>(k: K, v: PillarDraft[K]) => setP((x) => ({ ...x, [k]: v }));
@@ -104,6 +141,20 @@ function PillarForm({ pillar, slug, canWrite }: { pillar: PillarDraft; slug: Pil
         <Field label="Tagline" className="md:col-span-2">{(id) => <TextInput id={id} value={p.tagline} onChange={(e) => set('tagline', e.target.value)} disabled={!canWrite} />}</Field>
         <Field label="Description" className="md:col-span-2">{(id) => <TextArea id={id} value={p.description} onChange={(e) => set('description', e.target.value)} disabled={!canWrite} />}</Field>
         <Field label="Conclusion text" className="md:col-span-2">{(id) => <TextArea id={id} rows={2} value={p.conclusion} onChange={(e) => set('conclusion', e.target.value)} disabled={!canWrite} />}</Field>
+        <fieldset className="md:col-span-2 grid gap-4 rounded-xl border border-line p-4 md:grid-cols-2">
+          <legend className="px-1 text-sm font-semibold">English translation (optional — empty fields fall back to Somali)</legend>
+          {PILLAR_EN_FIELDS.map(([k, label, rows]) => (
+            <Field key={k} label={label} className={rows > 1 || k === 'tagline' ? 'md:col-span-2' : undefined}>
+              {(id) =>
+                rows === 1 ? (
+                  <TextInput id={id} lang="en" value={p.en?.[k] ?? ''} onChange={(e) => set('en', { ...p.en, [k]: e.target.value })} disabled={!canWrite} />
+                ) : (
+                  <TextArea id={id} lang="en" rows={rows} value={p.en?.[k] ?? ''} onChange={(e) => set('en', { ...p.en, [k]: e.target.value })} disabled={!canWrite} />
+                )
+              }
+            </Field>
+          ))}
+        </fieldset>
         <Field label="Icon">
           {(id) => <Select id={id} value={p.icon} onChange={(e) => set('icon', e.target.value)} disabled={!canWrite}>{ICON_NAMES.map((n) => <option key={n}>{n}</option>)}</Select>}
         </Field>

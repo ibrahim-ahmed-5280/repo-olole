@@ -93,7 +93,7 @@ export function Dialog({ open, onClose, title, closeLabel, children, side = 'rig
               'absolute flex max-h-dvh flex-col overflow-hidden border-line bg-surface shadow-2xl outline-none',
               side === 'right'
                 ? 'inset-y-0 right-0 w-full border-l sm:w-[30rem] sm:rounded-l-3xl'
-                : 'left-1/2 top-1/2 max-h-[90dvh] w-[min(42rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-3xl border',
+                : 'left-1/2 top-1/2 max-h-[calc(100dvh-2rem)] w-[min(36rem,calc(100vw-1.5rem))] -translate-x-1/2 -translate-y-1/2 rounded-3xl border',
               className,
             )}
             initial={side === 'right' ? { x: '100%' } : { opacity: 0, scale: 0.96 }}
@@ -101,7 +101,7 @@ export function Dialog({ open, onClose, title, closeLabel, children, side = 'rig
             exit={side === 'right' ? { x: '100%' } : { opacity: 0, scale: 0.96 }}
             transition={{ type: 'tween', duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="flex items-start justify-between gap-4 border-b border-line/70 px-5 pb-4 pt-[calc(1rem+env(safe-area-inset-top))] sm:px-6">
+            <div className={cx('flex items-start justify-between gap-4 border-b border-line/70 px-5 pb-4 sm:px-6', side === 'right' ? 'pt-[calc(1rem+env(safe-area-inset-top))]' : 'pt-4')}>
               <h2 id={titleId} data-dialog-title tabIndex={-1} className="pt-2 text-xl font-bold outline-none">
                 {title}
               </h2>
@@ -114,7 +114,7 @@ export function Dialog({ open, onClose, title, closeLabel, children, side = 'rig
                 <X className="size-5" aria-hidden />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-5 sm:px-6">{children}</div>
+            <div className={cx('flex-1 overflow-y-auto overscroll-contain px-5 pt-5 sm:px-6', side === 'right' ? 'pb-[calc(1.5rem+env(safe-area-inset-bottom))]' : 'pb-6')}>{children}</div>
           </motion.div>
         </div>
       )}

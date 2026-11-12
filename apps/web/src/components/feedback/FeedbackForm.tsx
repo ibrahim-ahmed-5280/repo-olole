@@ -12,7 +12,7 @@ import { Button, cx } from '../ui/primitives';
 
 const STORAGE = (slug: string) => `reveal.feedback.${slug}`;
 
-function wasSubmitted(slug: string) {
+export function wasSubmitted(slug: string) {
   try {
     return sessionStorage.getItem(STORAGE(slug)) === '1';
   } catch {
@@ -25,10 +25,14 @@ interface Props {
   /** Preview mode renders the form but never submits. */
   disabled?: boolean;
   onSkip?: () => void;
+  onSubmitted?: () => void;
+  /** 'dialog': rendered inside the feedback popup (the dialog provides the heading; "Not now" closes it). */
+  variant?: 'card' | 'dialog';
 }
 
 /** Optional, anonymous Yes/No feedback about a roadmap. Not an election vote. */
-export function FeedbackForm({ pillar, disabled, onSkip }: Props) {
+export function FeedbackForm({ pillar, disabled, onSkip, onSubmitted, variant = 'card' }: Props) {
+  const inDialog = variant === 'dialog';
   const t = useT();
   const ids = { q: useId(), s: useId(), hint: useId(), err: useId() };
   const mutation = useSubmitFeedback();
@@ -68,17 +72,19 @@ export function FeedbackForm({ pillar, disabled, onSkip }: Props) {
     }
     track({ type: 'feedback_submit', route: `/roadmap/${pillar}`, pillar });
     setDone(true);
+    onSubmitted?.();
   });
 
   if (done) {
     return (
-      <div ref={statusRef} tabIndex={-1} role="status" className="glass flex items-center gap-3 rounded-[var(--radius-card)] p-6 outline-none" data-testid="feedback-success">
+      <div ref={statusRef} tabIndex={-1} role="status" className={cx('flex flex-wrap items-center gap-3 outline-none', inDialog ? 'py-2' : 'glass rounded-[var(--radius-card)] p-6')} data-testid="feedback-success">
         <CheckCircle2 className="size-7 shrink-0 text-success" aria-hidden />
-        <p className="text-lg font-semibold">{t.feedback.success}</p>
+        <p className="flex-1 text-lg font-semibold">{t.feedback.success}</p>
+        {inDialog && onSkip && <Button variant="secondary" size="sm" onClick={onSkip}>{t.about.close}</Button>}
       </div>
     );
   }
-  if (skipped) {
+  if (skipped && !inDialog) {
     return (
       <div ref={statusRef} tabIndex={-1} role="status" className="flex flex-col items-start gap-3 rounded-[var(--radius-card)] border border-dashed border-line p-6 outline-none sm:flex-row sm:items-center sm:justify-between">
         <p className="text-muted">{t.feedback.skipped}</p>
@@ -91,8 +97,12 @@ export function FeedbackForm({ pillar, disabled, onSkip }: Props) {
     mutation.error instanceof ApiRequestError && mutation.error.status === 429 ? t.feedback.rateLimited : mutation.isError ? t.feedback.error : null;
 
   return (
-    <form onSubmit={onSubmit} noValidate className="glass rounded-[var(--radius-card)] p-5 sm:p-8" aria-describedby={ids.hint} data-testid="feedback-form">
-      <h2 className="font-display text-xl font-bold tracking-[0.08em] sm:text-2xl">{t.feedback.heading}</h2>
+    <form onSubmit={onSubmit} noValidate className={cx('relative', !inDialog && 'glass rounded-[var(--radius-card)] p-5 sm:p-8')} aria-describedby={ids.hint} data-testid="feedback-form">
+      {inDialog ? (
+        <p className="text-[15px] leading-relaxed text-muted">{t.feedback.prompt}</p>
+      ) : (
+        <h2 className="font-display text-xl font-bold sm:text-2xl">{t.feedback.heading}</h2>
+      )}
       <fieldset className="mt-5" aria-describedby={formState.errors.response ? ids.err : undefined}>
         <legend id={ids.q} className="text-base font-semibold text-ink">{t.feedback.question}</legend>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:max-w-sm">
@@ -123,6 +133,7 @@ export function FeedbackForm({ pillar, disabled, onSkip }: Props) {
           maxLength={FEEDBACK_SUGGESTION_MAX}
           aria-describedby={`${ids.s}-hint ${ids.s}-count`}
           aria-invalid={!!formState.errors.suggestion || undefined}
+          placeholder={t.feedback.placeholder}
           {...register('suggestion')}
           className="mt-2 w-full resize-y rounded-2xl border border-line bg-surface p-4 text-base text-ink placeholder:text-muted/70 focus:border-[color:var(--accent)]"
         />
@@ -150,11 +161,11 @@ export function FeedbackForm({ pillar, disabled, onSkip }: Props) {
         <Button
           variant="ghost"
           onClick={() => {
-            setSkipped(true);
+            if (!inDialog) setSkipped(true);
             onSkip?.();
           }}
         >
-          {t.feedback.skip}
+          {inDialog ? t.feedback.later : t.feedback.skip}
         </Button>
       </div>
       <p id={ids.hint} className="mt-5 text-xs text-muted">{t.feedback.disclaimer}</p>

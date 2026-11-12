@@ -3,7 +3,7 @@ import path from 'node:path';
 import { CandidateProfile, Milestone, Pillar, WebsiteSettings } from '../models/content';
 import { storeImage } from '../services/media';
 import { publish } from '../services/content';
-import { DEFAULT_CANDIDATE, DEFAULT_PILLARS, DEFAULT_SETTINGS, SEED_IMAGES, exampleMilestone } from './defaultContent';
+import { DEFAULT_CANDIDATE, DEFAULT_PILLARS, DEFAULT_SETTINGS, SEED_IMAGES, milestoneDocs } from './defaultContent';
 
 export interface SeedOptions {
   uploadDir: string;
@@ -52,10 +52,8 @@ export async function seedContent(opts: SeedOptions) {
       report.push(`pillar ${p.slug} created`);
     }
     if ((await Milestone.countDocuments({ pillarId: pillar._id })) === 0) {
-      await Milestone.insertMany(
-        p.milestones.map((m, i) => ({ pillarId: pillar!._id, title: m.title, icon: m.icon, order: i + 1, ...exampleMilestone(m.topic) })),
-      );
-      report.push(`${p.milestones.length} example milestones added to ${p.slug}`);
+      await Milestone.insertMany(milestoneDocs(p).map((m) => ({ pillarId: pillar!._id, ...m })));
+      report.push(`${p.milestones.length} milestones added to ${p.slug}`);
     }
   }
 

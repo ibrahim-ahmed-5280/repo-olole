@@ -81,7 +81,7 @@ export function InteractiveCandidate({ candidate, pillars, onOpenAbout, linkPref
   return (
     <div className="relative mx-auto w-full max-w-[34rem]" style={{ maxWidth: `min(34rem, calc(76dvh * ${natural.width / natural.height}))` }}>
       <div ref={ref} className="relative w-full" style={{ aspectRatio: `${natural.width} / ${natural.height}` }}>
-        <CandidatePortrait image={image} alt={`${t.intro.portraitAlt}: ${candidate.name}`} priority masked="frame" sizes="(max-width: 640px) 92vw, 544px" />
+        <CandidatePortrait image={image} alt={`${t.intro.portraitAlt}: ${candidate.name}`} priority masked="cutout" sizes="(max-width: 640px) 92vw, 544px" />
         {candidate.pose.isPlaceholder && (
           <Badge className="absolute left-2 top-2 border-warn/50 bg-surface text-warn" title={t.vision.placeholderNote}>
             {t.vision.placeholderBadge}
@@ -96,17 +96,14 @@ export function InteractiveCandidate({ candidate, pillars, onOpenAbout, linkPref
             const p = points[key];
             const chip =
               key === 'leadership' ? (
-                <span className="block rounded-2xl p-[1.5px] shadow-[var(--shadow-float)]" style={{ background: theme.gradient }}>
-                  <span className="flex min-w-52 flex-col items-center rounded-[calc(1rem-1px)] bg-surface px-5 py-3 text-center backdrop-blur">
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-glow">{pillar.subtitle}</span>
-                    <span className="mt-0.5 block font-display text-lg font-extrabold tracking-[0.2em]" style={{ color: theme.color }}>{pillar.name}</span>
-                    <span className="mt-1 h-px w-10" style={{ background: theme.gradient }} />
-                  </span>
+                <span className="flex min-w-44 flex-col items-center rounded-xl border bg-surface px-4 py-2 text-center" style={{ borderColor: `${theme.color}55` }}>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted">{pillar.subtitle}</span>
+                  <span className="mt-0.5 block font-display text-base font-extrabold tracking-[0.18em]" style={{ color: theme.color }}>{pillar.name}</span>
                 </span>
               ) : (
-                <span className="glass flex flex-col items-center rounded-xl px-3 py-1.5 text-center" style={{ borderColor: `${theme.color}66` }}>
-                  <span className="font-display text-sm font-bold tracking-[0.18em]" style={{ color: theme.color }}>{pillar.name}</span>
-                  <span className="text-[11px] text-muted">{pillar.subtitle}</span>
+                <span className="flex flex-col items-center rounded-lg border bg-surface px-3 py-1 text-center" style={{ borderColor: `${theme.color}55` }}>
+                  <span className="font-display text-[13px] font-bold tracking-[0.16em]" style={{ color: theme.color }}>{pillar.name}</span>
+                  <span className="text-[10px] text-muted">{pillar.subtitle}</span>
                 </span>
               );
             return (
@@ -139,8 +136,8 @@ export function InteractiveCandidate({ candidate, pillars, onOpenAbout, linkPref
             color={BRAND.glow}
             glow={BRAND.glowRgba}
             label={t.vision.aboutHotspotLabel}
-            icon={<HelpCircle className="size-6" aria-hidden />}
-            chip={<span className="glass rounded-lg px-2.5 py-1 font-display text-xs font-bold tracking-[0.18em] text-glow">{t.vision.aboutHotspot}</span>}
+            icon={<HelpCircle className="size-5" aria-hidden />}
+            chip={<span className="rounded-lg border border-brand-blue/30 bg-surface px-2.5 py-1 font-display text-xs font-bold tracking-[0.16em] text-glow">{t.vision.aboutHotspot}</span>}
             chipSide="below"
             compact={compact}
             onActivate={() => {

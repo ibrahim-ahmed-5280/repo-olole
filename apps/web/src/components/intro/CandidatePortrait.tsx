@@ -23,7 +23,8 @@ interface Props {
    * radial/bottom: blend the photo into the page with a mask.
    * frame: present a studio photo as a framed portrait with a Hormuud blue→green edge.
    */
-  masked?: 'radial' | 'bottom' | 'frame' | 'none';
+  /** cutout: a background-free photo on white with a soft Hormuud-green arch behind the person. */
+  masked?: 'radial' | 'bottom' | 'frame' | 'cutout' | 'none';
 }
 
 /** Responsive candidate portrait with WebP sources, stable aspect ratio and either a mask or a frame. */
@@ -58,7 +59,7 @@ export function CandidatePortrait({ image, alt, sizes = '(max-width: 640px) 90vw
     </picture>
   );
   const content = framed ? <div className="portrait-frame-inner h-full w-full">{picture}</div> : picture;
-  const boxClass = cx('relative w-full', framed && 'portrait-frame', className);
+  const boxClass = cx('relative w-full', framed && 'portrait-frame', masked === 'cutout' && 'portrait-cutout', className);
   const style = { aspectRatio: `${image.width} / ${image.height}` };
   if (!entrance) return <div className={boxClass} style={style}>{content}{children}</div>;
   return (

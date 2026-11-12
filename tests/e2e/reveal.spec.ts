@@ -21,6 +21,14 @@ async function signIn(page: Page, username: string, password: string) {
 }
 
 async function axe(page: Page) {
+  // Wait for finite entrance animations (Motion uses the Web Animations API) to finish, so contrast is measured on the final state.
+  await page.waitForFunction(
+    () =>
+      document.getAnimations().every((a) => a.playState !== 'running' || a.effect?.getTiming().iterations === Infinity) &&
+      [...document.querySelectorAll<HTMLElement>('[style*="opacity"]')].every((el) => ['0', '1'].includes(getComputedStyle(el).opacity)),
+    undefined,
+    { polling: 100 },
+  );
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
   const serious = results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
   expect(serious.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`)).toEqual([]);
@@ -103,30 +111,84 @@ test.describe('public experience', () => {
     expect(await page.evaluate(() => document.body.style.overflow)).toBe('');
   });
 
-  test('10–15: milestone navigation, progress, feedback with suggestion', async ({ page }) => {
+  test('10–15: milestone navigation, progress, feedback popup with suggestion', async ({ page }) => {
     await freshVisit(page, '/roadmap/waxbarasho');
-    await expect(page.getByTestId('progress-text')).toContainText('1 ee 6');
+    await expect(page.getByTestId('progress-text')).toContainText('1 ee 4');
     await page.getByTestId('next-milestone').click();
-    await expect(page.getByTestId('progress-text')).toContainText('2 ee 6');
+    await expect(page.getByTestId('progress-text')).toContainText('2 ee 4');
     const before = Number(await page.getByRole('progressbar').getAttribute('aria-valuenow'));
     await page.getByTestId('next-milestone').click();
-    await expect(page.getByTestId('progress-text')).toContainText('3 ee 6');
+    await expect(page.getByTestId('progress-text')).toContainText('3 ee 4');
     await page.getByTestId('prev-milestone').click();
-    await expect(page.getByTestId('progress-text')).toContainText('2 ee 6');
+    await expect(page.getByTestId('progress-text')).toContainText('2 ee 4');
 
     await page.getByTestId('roadmap-conclusion').scrollIntoViewIfNeeded();
     await expect.poll(async () => Number(await page.getByRole('progressbar').getAttribute('aria-valuenow'))).toBe(100);
     expect(before).toBeLessThan(100);
 
-    const form = page.getByTestId('feedback-form');
-    await expect(form).toBeVisible();
+    // Finishing the pillar opens the feedback popup automatically.
+    const dialog = page.getByRole('dialog', { name: 'Aragtidaada' });
+    await expect(dialog).toBeVisible();
+    const form = dialog.getByTestId('feedback-form');
+    await expect(form.getByRole('textbox')).toHaveAttribute('placeholder', 'Aragtidaada halkaan ku qor...');
     await form.getByText('Haa').click();
     await form.getByLabel(/Maxaad hagaajin/).fill('E2E suggestion: more study rooms');
     await form.getByRole('button', { name: 'Dir fikradda' }).click();
-    await expect(page.getByTestId('feedback-success')).toBeVisible();
+    await expect(dialog.getByTestId('feedback-success')).toBeVisible();
+    await dialog.getByRole('button', { name: 'Xir' }).first().click();
+    await expect(dialog).toBeHidden();
+    // The page shows the shared "submitted" state; the popup does not open again.
+    await expect(page.getByTestId('feedback-card').getByTestId('feedback-success')).toBeVisible();
+  });
+
+  test('feedback popup: "Not now" closes it and the button reopens it', async ({ page }) => {
+    await freshVisit(page, '/roadmap/hoggaan');
+    await page.getByTestId('roadmap-conclusion').scrollIntoViewIfNeeded();
+    const dialog = page.getByRole('dialog', { name: 'Aragtidaada' });
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole('button', { name: 'Hadda maya' }).click();
+    await expect(dialog).toBeHidden();
+    await page.getByTestId('feedback-open').click();
+    await expect(dialog).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+  });
+
+  test('language switch: the whole public site changes between Somali and English', async ({ page }) => {
+    await page.goto('/vision');
+    await expect(page.getByTestId('brand-logo')).toBeVisible();
+    await expect(page.getByTestId('hotspot-education')).toHaveAccessibleName(/WAXBARASHO/);
+    await page.getByRole('button', { name: 'en', exact: true }).click();
+    await expect(page.getByText('The Vision', { exact: true })).toBeVisible();
+    await expect(page.getByTestId('hotspot-education')).toHaveAccessibleName('Open the EDUCATION roadmap');
+    await expect(page.getByTestId('hotspot-leadership')).toHaveAccessibleName('Open the LEADERSHIP roadmap');
+    await expect(page.getByText('Hormuud University', { exact: true })).toBeVisible();
+
+    await page.getByTestId('pillar-link-waxbarasho').click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('EDUCATION');
+    await expect(page.getByRole('heading', { level: 3 }).first()).toContainText('Peer Study Groups');
+    await page.getByRole('button', { name: 'Details' }).first().click();
+    await expect(page.getByText('Challenge', { exact: true }).first()).toBeVisible();
+    await expect(page.getByTestId('progress-text')).toContainText('Milestone 1 of 4');
+    // No Somali UI text or example placeholders remain in English mode.
+    const text = await page.locator('body').innerText();
+    expect(text).not.toMatch(/Tusaale|Faahfaahin|Marxaladda|Ku noqo aragtida/);
+
+    await page.getByTestId('roadmap-conclusion').scrollIntoViewIfNeeded();
+    const dialog = page.getByRole('dialog', { name: 'Share your opinion' });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole('textbox')).toHaveAttribute('placeholder', 'Write your opinion here...');
+    await dialog.getByRole('button', { name: 'Not now' }).click();
+
+    // Switching back restores Somali everywhere.
+    await page.goto('/vision');
+    await page.getByRole('button', { name: 'so', exact: true }).click();
+    await expect(page.getByTestId('hotspot-education')).toHaveAccessibleName(/WAXBARASHO/);
   });
 
   test('24–25: refreshing a nested route works and back navigation returns', async ({ page }) => {
+    // This test is about routing + accessibility, not animation: scan the settled page.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/vision');
     await page.getByTestId('pillar-link-midnimo').click();
     await expect(page).toHaveURL(/\/roadmap\/midnimo$/);
@@ -239,7 +301,7 @@ test.describe('admin', () => {
 
     await page.goto('/admin/roadmaps/hoggaan');
     await page.getByTestId('add-milestone').click();
-    await page.getByRole('dialog').getByLabel('Title').fill('E2E Published Milestone');
+    await page.getByRole('dialog').getByLabel('Title', { exact: true }).fill('E2E Published Milestone');
     await page.getByRole('dialog').getByLabel('Short description (shown on the card)').fill('Created by the end-to-end test');
     await page.getByTestId('save-milestone').click();
     await expect(page.getByText('E2E Published Milestone')).toBeVisible();

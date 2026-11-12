@@ -67,7 +67,7 @@ export function RoadmapControls({ milestones, activeIndex, reached, color, onGo,
 
       {/* Bottom bar */}
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-        <div className="glass pointer-events-auto flex items-center gap-1 rounded-full p-1 shadow-2xl" role="group" aria-label={t.roadmap.milestoneNav}>
+        <div className="glass pointer-events-auto flex items-center gap-1 rounded-full border-line/90 bg-surface p-1 shadow-[0_2px_10px_-4px_rgb(22_43_37/0.14)]" role="group" aria-label={t.roadmap.milestoneNav}>
           <button type="button" className={iconBtn} onClick={() => onGo(activeIndex - 1)} disabled={activeIndex <= 0} aria-label={t.roadmap.prev} data-testid="prev-milestone">
             <ChevronUp className="size-5" aria-hidden />
           </button>
@@ -88,7 +88,7 @@ export function RoadmapControls({ milestones, activeIndex, reached, color, onGo,
         </div>
       </div>
       {shared && (
-        <div aria-hidden className="fixed bottom-24 left-1/2 z-30 -translate-x-1/2 rounded-full bg-elevated px-4 py-2 text-sm shadow-lg">
+        <div aria-hidden className="fixed bottom-24 left-1/2 z-30 -translate-x-1/2 rounded-full border border-line bg-surface px-4 py-2 text-sm">
           {t.roadmap.shared}
         </div>
       )}

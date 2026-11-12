@@ -18,6 +18,12 @@ export const so = {
   maintenanceTitle: 'Dayactir ayaa socda',
   language: 'Luqadda',
 
+  brand: {
+    title: 'Musharraxa Guddoomiyaha Kulliyadda Computer Science & IT',
+    university: 'Jaamacadda Hormuud',
+    logoAlt: 'Astaanta Jaamacadda Hormuud',
+  },
+
   intro: {
     eyebrow: 'Doorashada Hoggaanka Ardayda',
     heading: 'YAA KA DAMBEEYA ARAGTIDA?',
@@ -30,7 +36,6 @@ export const so = {
 
   vision: {
     eyebrow: 'Aragtida',
-    intro: 'Dooro tiir si aad u aragto khariidaddiisa — ama riix calaamadda su’aasha si aad u barato musharaxa.',
     navLabel: 'Tiirarka ololaha',
     navHeading: 'Sahami tiirarka',
     explore: 'Fur khariidadda',
@@ -84,7 +89,12 @@ export const so = {
   },
 
   feedback: {
-    heading: 'FIKRADDAADU WAY MUHIIMSAN TAHAY',
+    heading: 'Aragtidaada',
+    popupTitle: 'Aragtidaada',
+    prompt: 'Waad dhammaysay khariidaddan. Maxay kula tahay? Aragtidaadu waxay naga caawinaysaa inaan qorshaha hagaajino.',
+    open: 'Qor aragtidaada',
+    placeholder: 'Aragtidaada halkaan ku qor...',
+    later: 'Hadda maya',
     question: 'Ma u aragtaa khariidaddan mid waxtar leh?',
     yes: 'Haa',
     no: 'Maya',
@@ -106,6 +116,7 @@ export const so = {
 
   footer: {
     privacy: 'Asturnaanta',
+    navLabel: 'Xiriirada hoose',
     note: 'Bog ololeed oo arday. Fikradaha booqdayaashu ma aha ra’yi-ururin doorasho.',
   },
 

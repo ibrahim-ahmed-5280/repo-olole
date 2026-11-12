@@ -24,7 +24,7 @@ export function MysteryQuestionMark({ visible, focal, size = 0.4, delay = 0.55 }
           <div className="absolute inset-[-14%] rounded-full bg-[radial-gradient(closest-side,rgba(255,255,255,0.97),rgba(255,255,255,0.9)_62%,transparent)] backdrop-blur-[6px]" />
           <motion.svg
             viewBox="0 0 100 100"
-            className="relative block w-full drop-shadow-[0_0_14px_rgba(46,137,187,0.35)]"
+            className="relative block w-full"
             initial={{ opacity: 0, scale: 0.85 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}

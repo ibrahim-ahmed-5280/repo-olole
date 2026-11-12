@@ -25,6 +25,20 @@ const publishFields = {
 
 const anchor = { x: { type: Number, min: 0, max: 1 }, y: { type: Number, min: 0, max: 1 } };
 
+/** Optional English translations (Somali is primary; empty English fields fall back to Somali). */
+const str = (max: number) => ({ type: String, default: '', maxlength: max });
+const candidateEn = {
+  title: str(160), introduction: str(600), biography: str(5000), motivation: str(2000), vision: str(2000),
+  education: { type: [String], default: [] }, experience: { type: [String], default: [] },
+  skills: { type: [String], default: [] }, achievements: { type: [String], default: [] },
+};
+const pillarEn = { name: str(40), subtitle: str(80), tagline: str(160), description: str(1500), conclusion: str(1500) };
+const milestoneEn = {
+  title: str(140), summary: str(400), description: str(3000), problem: str(1500), solution: str(1500),
+  implementation: str(1500), expectedBenefit: str(1500), timeframe: str(80),
+};
+const settingsEn = { tagline: str(160), campaignContext: str(300), maintenanceMessage: str(400), privacyNotice: str(8000) };
+
 const candidateSchema = new Schema(
   {
     key: { type: String, default: 'main' },
@@ -46,6 +60,7 @@ const candidateSchema = new Schema(
       focal: anchor,
       anchors: { education: anchor, unity: anchor, leadership: anchor, about: anchor },
     },
+    en: candidateEn,
     ...publishFields,
   },
   { timestamps: true, collection: 'candidate_profiles' },
@@ -64,6 +79,7 @@ const pillarSchema = new Schema(
     theme: { type: String, enum: PILLAR_THEMES, required: true },
     icon: { type: String, enum: ICON_NAMES, required: true },
     order: { type: Number, required: true },
+    en: pillarEn,
     ...publishFields,
   },
   { timestamps: true, collection: 'pillars' },
@@ -89,6 +105,7 @@ const milestoneSchema = new Schema(
     status: { type: String, enum: MILESTONE_STATUSES, default: 'active' },
     /** Marks placeholder content that has not been approved by the campaign. Shown publicly as "Tusaale". */
     isExample: { type: Boolean, default: false },
+    en: milestoneEn,
   },
   { timestamps: true, collection: 'milestones' },
 );
@@ -109,6 +126,7 @@ const settingsSchema = new Schema(
     maintenanceMessage: { type: String, default: '', maxlength: 400 },
     socialLinks: { type: [{ label: String, url: String, _id: false }], default: [] },
     privacyNotice: { type: String, default: '', maxlength: 8000 },
+    en: settingsEn,
     ...publishFields,
   },
   { timestamps: true, collection: 'website_settings' },

@@ -48,6 +48,12 @@ export interface PublicImage {
   variants: ImageVariantDTO[];
 }
 
+/** English translations (optional; empty fields fall back to Somali). */
+export interface CandidateEn { title?: string; introduction?: string; biography?: string; education?: string[]; experience?: string[]; skills?: string[]; motivation?: string; vision?: string; achievements?: string[] }
+export interface PillarEn { name?: string; subtitle?: string; tagline?: string; description?: string; conclusion?: string }
+export interface MilestoneEn { title?: string; summary?: string; description?: string; problem?: string; solution?: string; implementation?: string; expectedBenefit?: string; timeframe?: string }
+export interface SettingsEn { tagline?: string; campaignContext?: string; maintenanceMessage?: string; privacyNotice?: string }
+
 export interface CandidateDTO {
   name: string;
   title: string;
@@ -68,6 +74,7 @@ export interface CandidateDTO {
     focal: Anchor;
     anchors: HotspotAnchors;
   };
+  en?: CandidateEn;
   version: number | null;
   publishedAt: string | null;
 }
@@ -87,6 +94,7 @@ export interface MilestoneDTO {
   order: number;
   status: MilestoneStatus;
   isExample: boolean;
+  en?: MilestoneEn;
 }
 
 export interface PillarDTO {
@@ -100,6 +108,7 @@ export interface PillarDTO {
   theme: PillarTheme;
   order: number;
   milestoneCount: number;
+  en?: PillarEn;
 }
 
 export interface RoadmapDTO extends PillarDTO {
@@ -116,6 +125,7 @@ export interface SiteSettingsDTO {
   maintenanceMessage: string;
   socialLinks: Array<{ label: string; url: string }>;
   privacyNotice: string;
+  en?: SettingsEn;
   publishedAt: string | null;
 }
 

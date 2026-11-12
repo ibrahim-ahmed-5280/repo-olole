@@ -16,6 +16,12 @@ export const en: Dictionary = {
   maintenanceTitle: 'Maintenance in progress',
   language: 'Language',
 
+  brand: {
+    title: 'Candidate for Chairperson — Faculty of Computer Science & IT',
+    university: 'Hormuud University',
+    logoAlt: 'Hormuud University logo',
+  },
+
   intro: {
     eyebrow: 'Student Leadership Election',
     heading: 'WHO IS BEHIND THE VISION?',
@@ -28,7 +34,6 @@ export const en: Dictionary = {
 
   vision: {
     eyebrow: 'The Vision',
-    intro: 'Choose a pillar to explore its roadmap — or tap the question mark to meet the candidate.',
     navLabel: 'Campaign pillars',
     navHeading: 'Explore the pillars',
     explore: 'Open roadmap',
@@ -82,7 +87,12 @@ export const en: Dictionary = {
   },
 
   feedback: {
-    heading: 'YOUR FEEDBACK MATTERS',
+    heading: 'Share your opinion',
+    popupTitle: 'Share your opinion',
+    prompt: 'You have finished this roadmap. What do you think? Your opinion helps us improve the plan.',
+    open: 'Write your opinion',
+    placeholder: 'Write your opinion here...',
+    later: 'Not now',
     question: 'Do you find this roadmap useful?',
     yes: 'Yes',
     no: 'No',
@@ -104,6 +114,7 @@ export const en: Dictionary = {
 
   footer: {
     privacy: 'Privacy',
+    navLabel: 'Footer links',
     note: 'Student campaign website. Visitor feedback is not an election poll.',
   },
 

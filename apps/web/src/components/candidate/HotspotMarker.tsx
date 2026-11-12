@@ -1,7 +1,6 @@
 import { useId, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { cx } from '../ui/primitives';
-import { TOKENS } from '../../lib/theme';
 
 export type ChipSide = 'left' | 'right' | 'below' | 'above';
 
@@ -34,23 +33,14 @@ export function HotspotMarker({ leftPct, topPct, color, glow, label, preview, ic
   const previewId = useId();
   const content = (
     <>
-      <span aria-hidden className="ring-pulse absolute inset-0 rounded-full" style={{ boxShadow: `0 0 0 2px ${color}` }} />
       <span
         aria-hidden
         className={cx(
-          'relative grid place-items-center rounded-full border-2 bg-surface/95 shadow-[var(--shadow-card)] backdrop-blur transition-transform duration-200 group-hover:scale-110 group-focus-visible:scale-110',
-          emphasis ? 'size-14' : 'size-12', // ≥ 48px touch targets
+          // Flat, product-style marker: white disc, thin coloured ring, soft halo ring (no glow, no pulse).
+          'relative grid place-items-center rounded-full border-2 bg-surface transition duration-200 group-hover:scale-105 group-focus-visible:scale-105',
+          emphasis ? 'size-13' : 'size-12', // ≥ 48px touch targets
         )}
-        style={
-          emphasis
-            ? {
-                borderColor: 'transparent',
-                color,
-                background: `linear-gradient(${TOKENS.surface}, ${TOKENS.surface}) padding-box, linear-gradient(135deg, ${TOKENS.brandGreen}, ${TOKENS.brandBlue}) border-box`,
-                boxShadow: `0 6px 20px -6px ${glow}, 0 0 0 6px rgba(26,133,86,0.08)`,
-              }
-            : { borderColor: color, color, boxShadow: `0 6px 18px -6px ${glow}` }
-        }
+        style={{ borderColor: color, color, boxShadow: `0 1px 3px rgb(22 43 37 / 0.12), 0 0 0 5px ${glow.replace(/[\d.]+\)$/, '0.14)')}` }}
       >
         {icon}
         {compact && number !== undefined && (
@@ -63,7 +53,7 @@ export function HotspotMarker({ leftPct, topPct, color, glow, label, preview, ic
         <span
           aria-hidden
           className={cx(
-            'pointer-events-none absolute whitespace-nowrap',
+            'absolute whitespace-nowrap', // part of the control: a larger tap target
             chipSide === 'left' && 'right-[calc(100%+0.6rem)] top-1/2 -translate-y-1/2',
             chipSide === 'right' && 'left-[calc(100%+0.6rem)] top-1/2 -translate-y-1/2',
             chipSide === 'below' && 'left-1/2 top-[calc(100%+0.5rem)] -translate-x-1/2',
@@ -78,7 +68,7 @@ export function HotspotMarker({ leftPct, topPct, color, glow, label, preview, ic
           id={previewId}
           role="tooltip"
           className={cx(
-            'glass pointer-events-none absolute left-1/2 z-20 w-56 -translate-x-1/2 rounded-xl px-3 py-2 text-left text-xs leading-snug text-ink opacity-0 shadow-xl transition duration-200 group-hover:opacity-100 group-focus-visible:opacity-100',
+            'pointer-events-none absolute left-1/2 z-20 w-56 -translate-x-1/2 rounded-xl border border-line bg-surface px-3 py-2 text-left text-xs leading-snug text-ink opacity-0 transition duration-200 group-hover:opacity-100 group-focus-visible:opacity-100',
             // Keep the preview clear of the label: below when the label sits above the hand.
             chipSide === 'above' && !compact ? 'top-[calc(100%+0.75rem)]' : 'bottom-[calc(100%+0.75rem)]',
           )}

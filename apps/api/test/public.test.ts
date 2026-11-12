@@ -27,16 +27,19 @@ describe('public content API', () => {
     expect(pillars.body.data.map((p: { slug: string }) => p.slug)).toEqual(['waxbarasho', 'midnimo', 'hoggaan']);
   });
 
-  it('returns a roadmap with ordered, example-flagged milestones and no admin-only fields', async () => {
+  it('returns a roadmap with ordered, written (non-example) bilingual milestones and no admin-only fields', async () => {
     const res = await request(ctx.app).get('/api/v1/pillars/midnimo');
     expect(res.status).toBe(200);
     const orders = res.body.data.milestones.map((m: { order: number }) => m.order);
     expect(orders).toEqual([...orders].sort((a, b) => a - b));
-    expect(res.body.data.milestones[0].isExample).toBe(true);
+    expect(res.body.data.milestones.every((m: { isExample: boolean }) => !m.isExample)).toBe(true);
+    expect(res.body.data.milestones[0].summary).not.toMatch(/Tusaale/);
+    expect(res.body.data.milestones[0].en.title).toBeTruthy();
+    expect(res.body.data.en.name).toBe('UNITY');
     expect(res.body.data.hiddenMilestones).toBeUndefined();
     expect(res.body.data._rawMilestones).toBeUndefined();
     const ms = await request(ctx.app).get('/api/v1/pillars/midnimo/milestones');
-    expect(ms.body.data).toHaveLength(6);
+    expect(ms.body.data).toHaveLength(4);
   });
 
   it('rejects unknown pillars', async () => {

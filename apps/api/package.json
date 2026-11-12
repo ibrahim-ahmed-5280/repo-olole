@@ -9,6 +9,7 @@
     "start": "node --env-file-if-exists=../../.env dist/server.js",
     "db:init": "tsx --env-file-if-exists=../../.env src/cli/init-db.ts",
     "db:seed": "tsx --env-file-if-exists=../../.env src/cli/seed.ts",
+    "db:migrate": "tsx --env-file-if-exists=../../.env src/cli/migrate.ts",
     "admin:create": "tsx --env-file-if-exists=../../.env src/cli/create-admin.ts",
     "media:import-portrait": "tsx --env-file-if-exists=../../.env src/cli/import-portrait.ts",
     "test": "vitest run"

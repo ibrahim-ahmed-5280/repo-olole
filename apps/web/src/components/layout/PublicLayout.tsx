@@ -5,6 +5,7 @@ import { useI18n } from '../../i18n';
 import { useSite } from '../../services/public';
 import { track } from '../../lib/analytics';
 import { MotionPreferenceProvider } from '../../lib/motion';
+import { BrandMark } from './BrandMark';
 
 /** Sends one page_view per route per tab session (de-duplicated, safe under StrictMode). */
 function RouteTracker() {
@@ -38,14 +39,14 @@ function RouteFocus() {
 export function LanguageSwitch() {
   const { locale, setLocale, t } = useI18n();
   return (
-    <div role="group" aria-label={t.language} className="glass flex rounded-full p-1 text-xs font-semibold">
+    <div role="group" aria-label={t.language} className="flex rounded-full border border-line bg-surface p-1 text-xs font-semibold">
       {(['so', 'en'] as const).map((l) => (
         <button
           key={l}
           type="button"
           onClick={() => setLocale(l)}
           aria-pressed={locale === l}
-          className={`min-h-9 min-w-11 rounded-full px-3 uppercase transition ${locale === l ? 'bg-primary/20 text-ink' : 'text-muted hover:text-ink'}`}
+          className={`min-h-9 min-w-11 rounded-full px-3 uppercase transition ${locale === l ? 'bg-primary text-white' : 'text-muted hover:text-ink'}`}
         >
           {l}
         </button>
@@ -55,16 +56,15 @@ export function LanguageSwitch() {
 }
 
 export function SiteHeader({ minimal = false }: { minimal?: boolean }) {
-  const site = useSite();
   return (
-    <header className="pointer-events-none fixed inset-x-0 top-0 z-40 border-b border-line/70 bg-bg/85 pt-[env(safe-area-inset-top)] backdrop-blur-md">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+    <header className="pointer-events-none fixed inset-x-0 top-0 z-40 border-b border-line/70 bg-surface/95 pt-[env(safe-area-inset-top)] backdrop-blur-md">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
         <Link
           to="/vision"
-          className="pointer-events-auto flex min-h-11 items-center gap-2 rounded-full pr-2 font-display text-sm font-bold tracking-[0.2em] text-ink"
+          className="pointer-events-auto flex min-h-11 min-w-0 items-center rounded-lg pr-2"
+          data-testid="site-brand"
         >
-          <span aria-hidden className="grid size-8 place-items-center rounded-full border border-primary/40 bg-primary/10 text-glow">?</span>
-          <span>{site.data?.branding.siteName ?? 'THE REVEAL'}</span>
+          <BrandMark compactBelow360 />
         </Link>
         {!minimal && (
           <div className="pointer-events-auto">
@@ -83,7 +83,7 @@ export function SiteFooter() {
     <footer className="border-t border-line bg-bg-soft px-4 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-8 text-sm text-muted sm:px-6">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="max-w-xl">{site.data?.branding.campaignContext}</p>
-        <nav aria-label="Footer" className="flex flex-wrap items-center gap-4">
+        <nav aria-label={t.footer.navLabel} className="flex flex-wrap items-center gap-4">
           {site.data?.socialLinks.map((l) => (
             <a key={l.url} href={l.url} rel="noopener noreferrer" target="_blank" className="min-h-11 content-center underline-offset-4 hover:text-ink hover:underline">
               {l.label}

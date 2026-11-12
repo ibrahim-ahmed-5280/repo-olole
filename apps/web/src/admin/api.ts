@@ -1,17 +1,5 @@
 import { useMutation, useQuery, useQueryClient, type QueryKey } from '@tanstack/react-query';
-import type {
-  AdminUserDTO,
-  AnalyticsSummaryDTO,
-  CandidateDTO,
-  FeedbackDTO,
-  MediaAssetDTO,
-  MilestoneDTO,
-  Permission,
-  PillarSlug,
-  RoadmapDTO,
-  Role,
-  SiteSettingsDTO,
-} from '@reveal/shared';
+import type { AdminUserDTO, AnalyticsSummaryDTO, CandidateDTO, FeedbackDTO, MediaAssetDTO, MilestoneDTO, Permission, PillarSlug, RoadmapDTO, Role, SiteSettingsDTO, CandidateEn, PillarEn } from '@reveal/shared';
 import { api, apiRequest } from '../lib/api';
 
 export interface Me {
@@ -43,6 +31,8 @@ export interface CandidateDraft {
   portraitAssetId: string | null;
   portraitFocal?: Anchor;
   pose: { assetId: string | null; isPlaceholder: boolean; focal: Anchor; anchors: Record<'education' | 'unity' | 'leadership' | 'about', Anchor> };
+  /** English translation (optional; empty fields fall back to Somali on the public site). */
+  en?: CandidateEn;
 }
 
 export interface PillarDraft {
@@ -56,6 +46,7 @@ export interface PillarDraft {
   icon: string;
   theme: string;
   order: number;
+  en?: PillarEn;
 }
 
 export interface MilestoneDraft extends Omit<MilestoneDTO, 'illustration'> {

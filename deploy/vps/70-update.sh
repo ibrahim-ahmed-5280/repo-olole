@@ -14,6 +14,8 @@ sha="$(bash "$SCRIPT_DIR/20-release.sh" "${1:-}" | tee /dev/stderr | tail -1)"
 [[ "$sha" == "$prev" ]] && { ok "already running $sha — nothing to do"; exit 0; }
 # New indexes (if any) are created before the switch; seeding is idempotent and never overwrites edits.
 as_reveal bash -c "cd '$REVEAL_RELEASES/$sha/apps/api' && '$(node_bin)' --env-file='$REVEAL_ENV_FILE' dist/cli/init-db.js" >/dev/null
+# Content migration: idempotent, never overwrites editor changes (see apps/api/src/seed/migrate.ts).
+as_reveal bash -c "cd '$REVEAL_RELEASES/$sha/apps/api' && '$(node_bin)' --env-file='$REVEAL_ENV_FILE' dist/cli/migrate.js"
 bash "$SCRIPT_DIR/40-activate.sh" "$sha"
 curl -fsS --max-time 10 "https://$REVEAL_DOMAIN/api/v1/health" | grep -q '"db":"up"' \
   && ok "public site healthy on https://$REVEAL_DOMAIN (now $sha, previously $prev)" \

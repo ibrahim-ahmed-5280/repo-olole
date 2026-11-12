@@ -9,6 +9,8 @@ import { useReducedMotionPref } from '../../lib/motion';
 import { Button } from '../ui/primitives';
 import { CandidatePortrait } from './CandidatePortrait';
 import { MysteryQuestionMark } from './MysteryQuestionMark';
+import { BrandMark } from '../layout/BrandMark';
+import { LanguageSwitch } from '../layout/PublicLayout';
 
 export const INTRO_SEEN_KEY = 'reveal.introSeen';
 
@@ -64,28 +66,24 @@ export function IntroScreen({ candidate }: { candidate: CandidateDTO | undefined
   const ratio = portrait ? portrait.width / portrait.height : 0.67;
 
   return (
-    <main id="main" className="hero-backdrop grain relative isolate flex h-dvh flex-col overflow-hidden">
-      <div aria-hidden className="ambient pointer-events-none absolute left-1/2 top-[22%] -z-10 size-[80vmin] -translate-x-1/2 rounded-full bg-primary/15 blur-3xl" />
-      <div aria-hidden className="ambient pointer-events-none absolute bottom-[-10%] right-[-10%] -z-10 size-[55vmin] rounded-full bg-brand-green/15 blur-3xl" />
-
-      {/* Brand + skip */}
-      <div className="flex shrink-0 items-center justify-between gap-3 px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:px-8">
-        <span className="flex items-center gap-2 whitespace-nowrap font-display text-sm font-bold tracking-[0.2em] text-ink">
-          <span aria-hidden className="grid size-8 place-items-center rounded-full border border-primary/40 bg-primary/10 text-glow">?</span>
-          {/* On very narrow phones only the mark is shown so the row never wraps. */}
-          <span className="max-[359px]:sr-only">THE REVEAL</span>
-        </span>
-        <Link
+    <main id="main" className="hero-backdrop relative isolate flex h-dvh flex-col overflow-hidden">
+      {/* Hormuud University brand + language + skip */}
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-line/70 px-4 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))] sm:px-8">
+        <BrandMark compactBelow360 textHiddenBelow={640} />
+        <div className="flex items-center gap-2">
+          <LanguageSwitch />
+          <Link
           to="/vision"
           onClick={() => {
             markIntroSeen();
             track({ type: 'intro_skip', route: '/' });
           }}
-          className="glass inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-full px-4 text-sm font-semibold text-ink hover:border-primary/60"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-line bg-surface px-3 text-sm font-semibold text-ink hover:border-primary/50 hover:bg-primary/5 sm:px-4"
         >
-          {t.intro.skip}
+          <span className="max-[419px]:sr-only">{t.intro.skip}</span>
           <ArrowRight className="size-4" aria-hidden />
-        </Link>
+          </Link>
+        </div>
       </div>
 
       {/* Heading */}
@@ -113,21 +111,12 @@ export function IntroScreen({ candidate }: { candidate: CandidateDTO | undefined
             entranceOffset={dropOffset}
             entranceDuration={INTRO_TIMING.portrait.duration}
             priority
-            masked="frame"
+            masked="cutout"
             sizes="(max-width: 640px) 90vw, 640px"
           >
             {/* Inside the moving portrait box: normalized to the image, so it stays on the face at any size. */}
-            <MysteryQuestionMark visible={!revealing} focal={focal} size={0.36} delay={INTRO_TIMING.questionMark.delay} />
+            <MysteryQuestionMark visible={!revealing} focal={focal} size={0.33} delay={INTRO_TIMING.questionMark.delay} />
           </CandidatePortrait>
-          {revealing && !reduced && (
-            <motion.div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 rounded-full bg-glow/20 blur-3xl"
-              initial={{ opacity: 0, scale: 0.6 }}
-              animate={{ opacity: [0, 0.8, 0], scale: [0.6, 1.1, 1.4] }}
-              transition={{ duration: 1.1 }}
-            />
-          )}
         </div>
       </div>
 
@@ -143,7 +132,7 @@ export function IntroScreen({ candidate }: { candidate: CandidateDTO | undefined
           onClick={reveal}
           loading={revealing}
           aria-live="polite"
-          className="w-full max-w-xs shadow-[0_14px_36px_-12px_rgba(26,133,86,0.55)] sm:w-auto sm:min-w-[17rem]"
+          className="w-full max-w-xs sm:w-auto sm:min-w-[17rem]"
           data-testid="intro-cta"
         >
           {revealing ? t.intro.revealing : t.intro.cta}

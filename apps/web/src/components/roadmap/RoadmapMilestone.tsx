@@ -24,14 +24,14 @@ function NodeShape({ variant, color, state, index }: { variant: PillarTheme; col
   const shape = variant === 'education' ? 'rounded-xl' : variant === 'leadership' ? 'rotate-45 rounded-md' : 'rounded-full';
   return (
     <span data-node className="relative grid size-12 place-items-center">
-      {state === 'active' && <span aria-hidden className="ring-pulse absolute inset-0 rounded-full" style={{ boxShadow: `0 0 0 2px ${color}` }} />}
       <span
         className={cx(base, shape)}
         style={{
           borderColor: filled ? color : TOKENS.lineStrong,
           background: filled ? color : TOKENS.surface,
           color: filled ? '#FFFFFF' : TOKENS.muted,
-          boxShadow: state === 'active' ? `0 0 28px ${color}88` : undefined,
+          outline: state === 'active' ? `3px solid ${color}33` : undefined,
+          outlineOffset: state === 'active' ? 3 : undefined,
         }}
       >
         <span className={variant === 'leadership' ? '-rotate-45' : ''}>
@@ -80,7 +80,7 @@ export const RoadmapMilestone = forwardRef<HTMLLIElement, Props>(function Roadma
         className={cx(
           'glass col-start-2 row-start-1 rounded-[var(--radius-card)] p-5 sm:p-6',
           leftSide ? 'md:col-start-1 md:text-right' : 'md:col-start-3',
-          state === 'active' && 'border-[color:var(--accent)]/60 shadow-[0_20px_60px_-25px_var(--accent-glow)]',
+          state === 'active' && 'border-[color:var(--accent)]/60',
         )}
       >
         <div className={cx('flex items-center gap-3', leftSide && 'md:flex-row-reverse')}>

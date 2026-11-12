@@ -26,18 +26,15 @@ export function VisionView({ candidate, pillars, linkPrefix = '', showReplay = t
   }, { replace: true });
 
   return (
-    <div className="hero-backdrop grain relative isolate min-h-dvh overflow-hidden">
-      <div aria-hidden className="ambient pointer-events-none absolute left-1/2 top-[12%] -z-10 size-[80vmin] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
-      <main id="main" className="mx-auto flex max-w-7xl flex-col items-center px-4 pb-16 pt-20 sm:px-6 sm:pt-24">
+    <div className="hero-backdrop relative isolate min-h-dvh overflow-x-clip">
+      <main id="main" className="mx-auto flex max-w-7xl flex-col items-center px-4 pb-16 pt-24 sm:px-6 sm:pt-28">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-glow">{t.vision.eyebrow}</p>
-          <h1 data-route-focus tabIndex={-1} className="mt-3 text-[clamp(1.75rem,5vw,3rem)] font-extrabold outline-none">{candidate.name}</h1>
-          {candidate.title && <p className="mx-auto mt-2 max-w-2xl text-sm text-muted sm:text-base">{candidate.title}</p>}
-          <p className="mx-auto mt-4 max-w-xl text-sm text-muted">{t.vision.intro}</p>
+          <h1 data-route-focus tabIndex={-1} className="mt-2 text-[clamp(1.6rem,4.5vw,2.75rem)] font-extrabold outline-none">{candidate.name}</h1>
         </motion.div>
 
         <motion.div
-          className="mt-6 w-full px-0 sm:px-28 md:px-40"
+          className="mt-1 w-full px-0 sm:mt-0 sm:px-28 md:px-40"
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}

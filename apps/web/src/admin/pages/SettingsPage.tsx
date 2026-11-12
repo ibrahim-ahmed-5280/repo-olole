@@ -55,6 +55,15 @@ export default function SettingsPage() {
         <Card title="Privacy notice">
           <Field label="Shown on /privacy (plain text)">{(id) => <TextArea id={id} rows={12} value={s.privacyNotice} onChange={(e) => set('privacyNotice', e.target.value)} />}</Field>
         </Card>
+        <Card title="English translation (optional)">
+          <p className="mb-4 text-sm text-muted">Shown when a visitor switches the site to English. Empty fields fall back to Somali.</p>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="Tagline (English)">{(id) => <TextInput id={id} lang="en" value={s.en?.tagline ?? ''} onChange={(e) => set('en', { ...s.en, tagline: e.target.value })} />}</Field>
+            <Field label="Maintenance message (English)">{(id) => <TextInput id={id} lang="en" value={s.en?.maintenanceMessage ?? ''} onChange={(e) => set('en', { ...s.en, maintenanceMessage: e.target.value })} />}</Field>
+            <Field label="Campaign context (English)" className="md:col-span-2">{(id) => <TextInput id={id} lang="en" value={s.en?.campaignContext ?? ''} onChange={(e) => set('en', { ...s.en, campaignContext: e.target.value })} />}</Field>
+            <Field label="Privacy notice (English)" className="md:col-span-2">{(id) => <TextArea id={id} lang="en" rows={10} value={s.en?.privacyNotice ?? ''} onChange={(e) => set('en', { ...s.en, privacyNotice: e.target.value })} />}</Field>
+          </div>
+        </Card>
         <div className="sticky bottom-4 flex justify-end"><Button type="submit" loading={save.isPending} icon={<Save className="size-4" aria-hidden />}>Save draft</Button></div>
       </form>
     </>
